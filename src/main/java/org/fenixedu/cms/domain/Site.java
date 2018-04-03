@@ -71,7 +71,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     public static final String SIGNAL_DELETED = "fenixedu.cms.site.deleted";
     public static final String SIGNAL_EDITED = "fenixedu.cms.site.edited";
 
-    public static final Comparator<Site> NAME_COMPARATOR = Comparator.comparing(Site::getName);
+    // qubExtension, Comparator.nulls
+    public static final Comparator<Site> NAME_COMPARATOR =
+            Comparator.comparing(Site::getName, Comparator.nullsLast(Comparator.naturalOrder()));
     public static final Comparator<Site> CREATION_DATE_COMPARATOR = Comparator.comparing(Site::getCreationDate);
 
     private static final Logger logger = LoggerFactory.getLogger(Site.class);
@@ -555,6 +557,11 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
             setThemeType(null);
         }
         logger.info("Site " + getSlug() + " theme changed by user " + Authenticate.getUser());
+    }
+
+    // qubExtension
+    public CMSTheme getThemeFromSuper() {
+        return super.getTheme();
     }
 
     @Override
