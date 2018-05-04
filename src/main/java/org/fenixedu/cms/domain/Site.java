@@ -242,6 +242,11 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     
     }
 
+    // qubExtension, to remove
+    public void setNameToSuper(final LocalizedString name) {
+        super.setName(name);
+    }
+
     /**
      * saves the name of the site and creates a new slug for the site.
      */
@@ -557,11 +562,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
             setThemeType(null);
         }
         logger.info("Site " + getSlug() + " theme changed by user " + Authenticate.getUser());
-    }
-
-    // qubExtension
-    public CMSTheme getThemeFromSuper() {
-        return super.getTheme();
     }
 
     @Override
