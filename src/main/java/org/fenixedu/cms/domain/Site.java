@@ -18,9 +18,18 @@
  */
 package org.fenixedu.cms.domain;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
@@ -47,39 +56,40 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
-final public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
+public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.site.created";
     public static final String SIGNAL_DELETED = "fenixedu.cms.site.deleted";
     public static final String SIGNAL_EDITED = "fenixedu.cms.site.edited";
 
-    public static final Comparator<Site> NAME_COMPARATOR = Comparator.comparing(Site::getName);
+    // qubExtension, Comparator.nulls
+    public static final Comparator<Site> NAME_COMPARATOR =
+            Comparator.comparing(Site::getName, Comparator.nullsLast(Comparator.naturalOrder()));
     public static final Comparator<Site> CREATION_DATE_COMPARATOR = Comparator.comparing(Site::getCreationDate);
 
     private static final Logger logger = LoggerFactory.getLogger(Site.class);
     private Group defaultRoleTemplateRole;
-    
+
     protected Site() {
         super();
     }
 
     /**
      * the logged {@link User} creates a new {@link Site}.
+     * 
      * @param name name
      * @param description description
      */
-    public Site(LocalizedString name, LocalizedString description) {
+    public Site(final LocalizedString name, final LocalizedString description) {
         super();
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
@@ -118,7 +128,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @param group the group of people who can view this site
      */
     @Atomic
-    public void setCanViewGroup(Group group) {
+    public void setCanViewGroup(final Group group) {
         setViewGroup(group.toPersistentGroup());
     }
 
@@ -129,7 +139,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @return the {@link Site} with the given slug if it exists
      * @throws CmsDomainException if the site doesn't exist
      */
-    public static Site fromSlug(String slug) {
+    public static Site fromSlug(final String slug) {
         if (slug == null) {
             return null;
         }
@@ -146,7 +156,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
 
     private static final Map<String, Site> siteCache = new ConcurrentHashMap<>();
 
-    private static Site manualFind(String slug) {
+    private static Site manualFind(final String slug) {
         return Bennu.getInstance().getSitesSet().stream().filter(site -> site.getSlug() != null && site.getSlug().equals(slug))
                 .findAny().orElse(null);
     }
@@ -157,8 +167,9 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @param slug the slug of the {@link Page} wanted.
      * @return the {@link Page} with the given slug if it exists on this site
      */
-    public Page pageForSlug(String slug) {
-        return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElseThrow(() ->  CmsDomainException.notFound());
+    public Page pageForSlug(final String slug) {
+        return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny()
+                .orElseThrow(() -> CmsDomainException.notFound());
     }
 
     /**
@@ -168,7 +179,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @return the archived {@link Page} with the given slug if it exists on this site,
      *         or null otherwise.
      */
-    public Page archivedPageForSlug(String slug) {
+    public Page archivedPageForSlug(final String slug) {
         return getArchivedPagesSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
     }
 
@@ -178,7 +189,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @param slug the slug of the {@link Post} wanted.
      * @return the {@link Post} with the given slug if it exists on this site
      */
-    public Post postForSlug(String slug) {
+    public Post postForSlug(final String slug) {
         return getPostSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
     }
 
@@ -189,7 +200,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @return the archived {@link Post} with the given slug if it exists on this site,
      *         or null otherwise.
      */
-    public Post archivedPostForSlug(String slug) {
+    public Post archivedPostForSlug(final String slug) {
         return getArchivedPostsSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
     }
 
@@ -200,8 +211,9 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @return the {@link Category} with the given slug if it exists on this site.
      * @throws CmsDomainException if the category is not found
      */
-    public Category categoryForSlug(String slug) {
-        return getCategoriesSet().stream().filter(category -> slug.equals(category.getSlug())).findAny().orElseThrow(() -> CmsDomainException.notFound());
+    public Category categoryForSlug(final String slug) {
+        return getCategoriesSet().stream().filter(category -> slug.equals(category.getSlug())).findAny()
+                .orElseThrow(() -> CmsDomainException.notFound());
     }
 
     @Atomic
@@ -212,7 +224,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @param name {@link Category} name.
      * @return the {@link Category} with the given slug if it exists on this site, or null otherwise.
      */
-    public Category getOrCreateCategoryForSlug(String slug, LocalizedString name) {
+    public Category getOrCreateCategoryForSlug(final String slug, final LocalizedString name) {
         try {
             return categoryForSlug(slug);
         } catch (CmsDomainException e) {
@@ -223,18 +235,23 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     }
 
     @Override
-    public void setSlug(String slug) {
+    public void setSlug(final String slug) {
         String oldSlug = getSlug();
         super.setSlug(SlugUtils.makeSlug(this, slug));
         logger.info("Site " + getExternalId() +  " slug changed from " + oldSlug + " to " + getSlug() + " by user "+ Authenticate.getUser().getUsername());
     
     }
 
+    // qubExtension, to remove
+    public void setNameToSuper(final LocalizedString name) {
+        super.setName(name);
+    }
+
     /**
      * saves the name of the site and creates a new slug for the site.
      */
     @Override
-    public void setName(LocalizedString name) {
+    public void setName(final LocalizedString name) {
         LocalizedString prevName = getName();
         super.setName(name);
         if (prevName == null) {
@@ -250,7 +267,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @return the {@link Menu} with the given oid if it exists on this site, or
      *         null otherwise.
      */
-    public Menu menuForOid(String oid) {
+    public Menu menuForOid(final String oid) {
         Menu menu = FenixFramework.getDomainObject(oid);
         if (menu == null || menu.getSite() != this) {
             return null;
@@ -266,7 +283,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @return the {@link Menu} with the given oid if it exists on this site, or
      *         null otherwise.
      */
-    public Menu menuForSlug(String slug) {
+    public Menu menuForSlug(final String slug) {
         return getMenusSet().stream().filter(x -> slug.equals(x.getSlug())).findAny().orElse(null);
     }
 
@@ -301,14 +318,14 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         }
     }
 
-    public TreeSet<Menu> getOrderedMenusSet(){
-        TreeSet<Menu> menus = new TreeSet<Menu>();
+    public TreeSet<Menu> getOrderedMenusSet() {
+        TreeSet<Menu> menus = new TreeSet<>();
         getMenusSet().stream().sorted().forEach(m -> menus.add(m));
         return menus;
     }
 
     @Override
-    public Site clone(CloneCache cloneCache) {
+    public Site clone(final CloneCache cloneCache) {
         return cloneCache.getOrClone(this, obj -> {
             Set<Page> pages = new HashSet<>(getPagesSet());
             Set<Menu> menus = new HashSet<>(getMenusSet());
@@ -385,8 +402,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         getPagesSet().stream().forEach(org.fenixedu.cms.domain.Page::delete);
         getRolesSet().stream().forEach(Role::delete);
         deleteDomainObject();
-        
-        
+
     }
 
     /**
@@ -439,8 +455,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     }
 
     @Override
-    public boolean
-    isValidSlug(String slug) {
+    public boolean isValidSlug(final String slug) {
         Stream<MenuItem> menuItems = PortalConfiguration.getInstance().getMenu().getOrderedChild().stream();
         return !Strings.isNullOrEmpty(slug)
                 && (slug.equals(getSlug()) || menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug)));
@@ -471,7 +486,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     }
 
     @Override
-    public void setFolder(CMSFolder folder) {
+    public void setFolder(final CMSFolder folder) {
         super.setFolder(folder);
         if (folder != null && getFunctionality() != null) {
             deleteMenuFunctionality();
@@ -483,11 +498,12 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     public boolean checkHasEitherFunctionalityOrFolder() {
         return getFunctionality() != null || getFolder() != null;
     }
-    
+
     public Role getDefaultRoleTemplateRole() {
-        return getRolesSet().stream().filter(role->role.getRoleTemplate().equals(getDefaultRoleTemplate())).findAny().orElseGet(()->null);
+        return getRolesSet().stream().filter(role -> role.getRoleTemplate().equals(getDefaultRoleTemplate())).findAny()
+                .orElseGet(() -> null);
     }
-    
+
     public class SiteWrap extends Wrap {
 
         public boolean canPost() {
@@ -538,14 +554,14 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     }
 
     @Override
-    public void setTheme(CMSTheme theme) {
+    public void setTheme(final CMSTheme theme) {
         super.setTheme(theme);
         if (theme != null) {
             setThemeType(theme.getType());
         } else {
             setThemeType(null);
         }
-        logger.info("Site " + getSlug() + " theme changed by user "+ Authenticate.getUser());
+        logger.info("Site " + getSlug() + " theme changed by user " + Authenticate.getUser());
     }
 
     @Override
@@ -569,7 +585,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         }
     }
 
-    public void pushActivity(SiteActivity siteActivity) {
+    public void pushActivity(final SiteActivity siteActivity) {
         siteActivity.setNext(null);
         siteActivity.setPrevious(getLastActivityLine());
         setLastActivityLine(siteActivity);
@@ -583,7 +599,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
             return date;
         }
 
-        private void setDate(DateTime date) {
+        private void setDate(final DateTime date) {
             this.date = date;
         }
 
@@ -591,7 +607,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
             return items;
         }
 
-        private void setItems(List<SiteActivity> items) {
+        private void setItems(final List<SiteActivity> items) {
             this.items = items;
         }
     }

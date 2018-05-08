@@ -1,6 +1,8 @@
 package org.fenixedu.cms.api;
 
-import pt.ist.fenixframework.FenixFramework;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -35,9 +37,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import pt.ist.fenixframework.FenixFramework;
 
 @RunWith(FenixFrameworkRunner.class)
 public class TestSiteResource extends TestCmsApi {
@@ -72,7 +72,7 @@ public class TestSiteResource extends TestCmsApi {
         User user = CmsTestUtils.createAuthenticatedUser("listUserSingleSites");
         CmsTestUtils.setUserAsManager(user);
         int sitesCount = new JsonParser().parse(getSitesTarget().request().get(String.class)).getAsJsonArray().size();
-        
+
         Site site = CmsTestUtils.createSite(user, "listUserSingleSites");
 
         // execute
@@ -85,7 +85,7 @@ public class TestSiteResource extends TestCmsApi {
         JsonArray jsonResponseArray = new JsonParser().parse(response).getAsJsonArray();
         assertTrue("response should contain only a single site", jsonResponseArray.size() - sitesCount == 1);
 
-        JsonObject jsonResponse = jsonResponseArray.get(jsonResponseArray.size()-1).getAsJsonObject();
+        JsonObject jsonResponse = jsonResponseArray.get(jsonResponseArray.size() - 1).getAsJsonObject();
 
         JsonElement siteJson = removeNullKeys(new SiteAdapter().view(site, new JsonBuilder()));
 
@@ -97,7 +97,7 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("listUserSeveralSites");
 
-        Set<JsonElement> expectedJsonSites = new HashSet<JsonElement>();
+        Set<JsonElement> expectedJsonSites = new HashSet<>();
 
         Site site1 = CmsTestUtils.createSite(user, "listUserSeveralSites1");
         JsonElement site1json = removeNullKeys(new SiteAdapter().view(site1, ctx));
@@ -117,8 +117,8 @@ public class TestSiteResource extends TestCmsApi {
         JsonArray jsonResponseArray = new JsonParser().parse(response).getAsJsonArray();
         assertTrue("response should contain two sites", jsonResponseArray.size() == 2);
 
-        assertTrue("response should include site1 and site2", expectedJsonSites.contains(jsonResponseArray.get(0))
-                && expectedJsonSites.contains(jsonResponseArray.get(1)));
+        assertTrue("response should include site1 and site2",
+                expectedJsonSites.contains(jsonResponseArray.get(0)) && expectedJsonSites.contains(jsonResponseArray.get(1)));
     }
 
     @Test
@@ -126,11 +126,10 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutName");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
-        
-        LocalizedString description =
-                new LocalizedString(Locale.UK, "createErrorSiteWithoutName-description-uk").with(Locale.US,
-                        "createErrorSiteWithoutName-description-us");
+        Authenticate.mock(user, "TODO: CHANGE ME");
+
+        LocalizedString description = new LocalizedString(Locale.UK, "createErrorSiteWithoutName-description-uk").with(Locale.US,
+                "createErrorSiteWithoutName-description-us");
         SiteBean siteBean = new SiteBean(null, description);
 
         // execute
@@ -145,18 +144,17 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutDescription");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
-        
-        LocalizedString name =
-                new LocalizedString(Locale.UK, "createErrorSiteWithoutDescription-name-uk").with(Locale.US,
-                        "createErrorSiteWithoutDescription-name-us");
+        Authenticate.mock(user, "TODO: CHANGE ME");
+
+        LocalizedString name = new LocalizedString(Locale.UK, "createErrorSiteWithoutDescription-name-uk").with(Locale.US,
+                "createErrorSiteWithoutDescription-name-us");
         SiteBean siteBean = new SiteBean(name, null);
 
         // execute
         Response response =
                 getSitesTarget().request().post(Entity.entity(siteBean.toJson(), MediaType.APPLICATION_JSON), Response.class);
-        LOGGER.debug("createErrorSiteWithoutDescription: response = " + response.getStatus() + " (" + response.getStatusInfo()
-                + ")");
+        LOGGER.debug(
+                "createErrorSiteWithoutDescription: response = " + response.getStatus() + " (" + response.getStatusInfo() + ")");
         assertEquals(412, response.getStatus());
     }
 
@@ -165,8 +163,8 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createMinSite");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
-        
+        Authenticate.mock(user, "TODO: CHANGE ME");
+
         LocalizedString name = new LocalizedString(Locale.UK, "createMinSite-name-uk").with(Locale.US, "createMinSite-name-us");
         LocalizedString description =
                 new LocalizedString(Locale.UK, "createMinSite-description-uk").with(Locale.US, "createMinSite-description-us");
@@ -187,8 +185,8 @@ public class TestSiteResource extends TestCmsApi {
         assertTrue("create endpoint should return id of an existing site", site != null);
 
         assertTrue("response site should have a slug field", jsonResponse.has("slug"));
-        assertEquals("slug response should be equal to expected slug", StringNormalizer.slugify(name.getContent()), jsonResponse
-                .get("slug").getAsString());
+        assertEquals("slug response should be equal to expected slug", StringNormalizer.slugify(name.getContent()),
+                jsonResponse.get("slug").getAsString());
 
         assertTrue("response site should have an name field", jsonResponse.has("name"));
         assertEquals("name response should be equal to expected name", name,
@@ -201,18 +199,19 @@ public class TestSiteResource extends TestCmsApi {
         assertTrue("response site should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response site should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
-                .getAsBoolean());
+        assertEquals("published response should be equal to expected published", false,
+                jsonResponse.get("published").getAsBoolean());
 
         assertTrue("response site should have an embedded field", jsonResponse.has("embedded"));
-        assertEquals("embedded response should be equal to expected embedded", false, jsonResponse.get("embedded").getAsBoolean());
+        assertEquals("embedded response should be equal to expected embedded", false,
+                jsonResponse.get("embedded").getAsBoolean());
 
         assertTrue("response site should have an createdBy field", jsonResponse.has("createdBy"));
-        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
-                .get("createdBy").getAsString());
+        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(),
+                jsonResponse.get("createdBy").getAsString());
 
         assertFalse("response site should not contain alternativeSite", jsonResponse.has("alternativeSite"));
         assertFalse("response site should not contain analyticsCode", jsonResponse.has("analyticsCode"));
@@ -224,8 +223,8 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createFullSite");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
-        
+        Authenticate.mock(user, "TODO: CHANGE ME");
+
         CMSTheme theme = new CMSTheme();
         theme.setType("createFullSite-theme-type");
 
@@ -234,11 +233,11 @@ public class TestSiteResource extends TestCmsApi {
                 new LocalizedString(Locale.UK, "createFullSite-description-uk").with(Locale.US, "createFullSite-description-us");
         SiteBean siteBean = new SiteBean(name, description);
         siteBean.setEmbedded(true);
-        LOGGER.debug("Theme Id "+  theme.getExternalId());
+        LOGGER.debug("Theme Id " + theme.getExternalId());
         siteBean.setTheme(theme.getExternalId());
 
         DateTime creationDate = new DateTime();
-        LOGGER.debug("submitting "+ siteBean.toJson());
+        LOGGER.debug("submitting " + siteBean.toJson());
         // execute
         String response =
                 getSitesTarget().request().post(Entity.entity(siteBean.toJson(), MediaType.APPLICATION_JSON), String.class);
@@ -252,8 +251,8 @@ public class TestSiteResource extends TestCmsApi {
         assertTrue("create endpoint should return in of an existing site", site != null);
 
         assertTrue("response site should have a slug field", jsonResponse.has("slug"));
-        assertEquals("slug response should be equal to expected slug", StringNormalizer.slugify(name.getContent()), jsonResponse
-                .get("slug").getAsString());
+        assertEquals("slug response should be equal to expected slug", StringNormalizer.slugify(name.getContent()),
+                jsonResponse.get("slug").getAsString());
 
         assertTrue("response site should have an name field", jsonResponse.has("name"));
         assertEquals("name response should be equal to expected name", name,
@@ -266,22 +265,22 @@ public class TestSiteResource extends TestCmsApi {
         assertTrue("response site should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response site should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
-                .getAsBoolean());
+        assertEquals("published response should be equal to expected published", false,
+                jsonResponse.get("published").getAsBoolean());
 
         assertTrue("response site should have an embedded field", jsonResponse.has("embedded"));
         assertEquals("embedded response should be equal to expected embedded", true, jsonResponse.get("embedded").getAsBoolean());
 
         assertTrue("response site should have an createdBy field", jsonResponse.has("createdBy"));
-        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
-                .get("createdBy").getAsString());
+        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(),
+                jsonResponse.get("createdBy").getAsString());
 
         assertTrue("response site should have an theme field", jsonResponse.has("theme"));
-        assertEquals("theme response should be equal to expected theme", theme.getExternalId(), jsonResponse.get("theme")
-                .getAsString());
+        assertEquals("theme response should be equal to expected theme", theme.getExternalId(),
+                jsonResponse.get("theme").getAsString());
 
         assertFalse("response site should not contain alternativeSite", jsonResponse.has("alternativeSite"));
         assertFalse("response site should not contain analyticsCode", jsonResponse.has("analyticsCode"));
@@ -313,20 +312,19 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("editSite");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
-        
+        Authenticate.mock(user, "TODO: CHANGE ME");
+
         Site site = CmsTestUtils.createSite(user, "editSite");
         EnumSet<Permission> permissions = CmsTestUtils.bootstrapAdminPermissions();
         permissions.add(Permission.CHANGE_THEME);
-        
-        Role role = new Role(CmsTestUtils.createRoleTemplate("admin", permissions),site);
+
+        Role role = new Role(CmsTestUtils.createRoleTemplate("admin", permissions), site);
         role.setGroup(user.groupOf());
-        
+
         LocalizedString nameEdit =
                 new LocalizedString(Locale.UK, "site name uk nameEdit").with(Locale.US, "site name us nameEdit");
-        LocalizedString descriptionEdit =
-                new LocalizedString(Locale.UK, "site description uk descriptionEdit").with(Locale.US,
-                        "site description us descriptionEdit");
+        LocalizedString descriptionEdit = new LocalizedString(Locale.UK, "site description uk descriptionEdit").with(Locale.US,
+                "site description us descriptionEdit");
         SiteBean siteBean = new SiteBean(nameEdit, descriptionEdit);
         CMSTheme theme = new CMSTheme();
         theme.setType("createFullSite-theme-type");
@@ -360,20 +358,20 @@ public class TestSiteResource extends TestCmsApi {
         assertEquals("edit site should have edited theme", siteBean.getTheme(), jsonResponse.get("theme").getAsString());
 
         assertTrue("edited Site should contain name slug", jsonResponse.has("slug"));
-        assertEquals("edit site should have edited slug", StringNormalizer.slugify(siteBean.getSlug()), jsonResponse.get("slug")
-                .getAsString());
+        assertEquals("edit site should have edited slug", StringNormalizer.slugify(siteBean.getSlug()),
+                jsonResponse.get("slug").getAsString());
 
         assertTrue("edited Site should contain name analyticsCode", jsonResponse.has("analyticsCode"));
-        assertEquals("edit site should have edited analyticsCode", siteBean.getAnalyticsCode(), jsonResponse.get("analyticsCode")
-                .getAsString());
+        assertEquals("edit site should have edited analyticsCode", siteBean.getAnalyticsCode(),
+                jsonResponse.get("analyticsCode").getAsString());
 
         assertTrue("edited Site should contain name alternativeSite", jsonResponse.has("alternativeSite"));
         assertEquals("edit site should have edited alternativeSite", siteBean.getAlternativeSite(),
                 jsonResponse.get("alternativeSite").getAsString());
 
         assertTrue("edited Site should contain name published", jsonResponse.has("published"));
-        assertEquals("edit site should have edited published", siteBean.getPublished(), jsonResponse.get("published")
-                .getAsBoolean());
+        assertEquals("edit site should have edited published", siteBean.getPublished(),
+                jsonResponse.get("published").getAsBoolean());
     }
 
 }
