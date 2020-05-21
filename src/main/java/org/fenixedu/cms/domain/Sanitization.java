@@ -18,12 +18,11 @@
  */
 package org.fenixedu.cms.domain;
 
+import java.util.Locale;
+
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
-
-import java.util.Locale;
-import java.util.function.Function;
 
 public class Sanitization {
 
@@ -45,7 +44,7 @@ public class Sanitization {
             .onElements("th").allowAttributes("colspan").onElements("th").allowAttributes("rowspan").onElements("th")
             .allowAttributes("scope").onElements("th").allowAttributes("width").onElements("th").allowAttributes("type")
             .onElements("ul").allowAttributes("class", "color").onElements("iframe")
-            .allowAttributes("width", "height", "src").globally().toFactory();
+            .allowAttributes("width", "height", "src", "allow", "allowfullscreen").globally().toFactory();
 
     private static PolicyFactory STRICT_SANITIZER = new HtmlPolicyBuilder().toFactory();
 
