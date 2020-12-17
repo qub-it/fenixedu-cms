@@ -74,6 +74,7 @@ class Page{
   String slug;
   String templateType;
   boolean published;
+  boolean embedded;
 }
 
 class Category{

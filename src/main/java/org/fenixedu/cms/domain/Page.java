@@ -351,4 +351,8 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             return clone;
         });
     }
+    
+    public boolean isEmbedded() {
+        return getEmbedded();
+    }
 }
