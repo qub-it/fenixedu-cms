@@ -146,7 +146,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
 
     @Override
     public void addComponents(Component components) {
-        logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
+        logger.debug("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
                 " component " + components.getType() + " added by user "+ Authenticate.getUser().getUsername());
         super.addComponents(components);
     }
@@ -258,7 +258,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             setTemplateType(null);
         }
 
-        logger.info(
+        logger.debug(
                 "Page " + getSlug() + " of Site " + getSite().getSlug() + " template changed by user " + Authenticate.getUser());
     }
 

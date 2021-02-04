@@ -85,7 +85,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     /**
      * the logged {@link User} creates a new {@link Site}.
-     * 
+     *
      * @param name name
      * @param description description
      */
@@ -238,8 +238,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     public void setSlug(final String slug) {
         String oldSlug = getSlug();
         super.setSlug(SlugUtils.makeSlug(this, slug));
-        logger.info("Site " + getExternalId() +  " slug changed from " + oldSlug + " to " + getSlug() + " by user "+ Authenticate.getUser().getUsername());
-    
+        logger.debug("Site " + getExternalId() + " slug changed from " + oldSlug + " to " + getSlug() + " by user "
+                + Authenticate.getUser().getUsername());
     }
 
     // qubExtension, to remove
@@ -374,7 +374,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     @Atomic
     public void delete() {
-        logger.info("Site " + getSlug() + " - " + getExternalId() + " deleted by user "+ Authenticate.getUser().getUsername());
+        logger.info("Site " + getSlug() + " - " + getExternalId() + " deleted by user " + Authenticate.getUser().getUsername());
         Signal.emit(SIGNAL_DELETED, this.getOid());
 
         MenuFunctionality mf = getFunctionality();
@@ -491,7 +491,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         if (folder != null && getFunctionality() != null) {
             deleteMenuFunctionality();
         }
-        logger.info("Site " + getSlug()  + " - " + getExternalId() +  " folder changed by user "+ Authenticate.getUser().getUsername());
+        logger.debug("Site " + getSlug() + " - " + getExternalId() + " folder changed by user "
+                + Authenticate.getUser().getUsername());
     }
 
     @ConsistencyPredicate
@@ -561,7 +562,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         } else {
             setThemeType(null);
         }
-        logger.info("Site " + getSlug() + " theme changed by user " + Authenticate.getUser());
+        logger.debug("Site " + getSlug() + " theme changed by user " + Authenticate.getUser());
     }
 
     @Override
