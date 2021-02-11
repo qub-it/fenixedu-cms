@@ -237,6 +237,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     public class MenuItemWrap extends Wrap {
         private final boolean active;
         private final boolean open;
+        private final boolean embedded;
         private final List<Wrap> children;
 
         public MenuItemWrap() {
@@ -245,12 +246,14 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
                     .collect(Collectors.toList());
             active = false;
             open = false;
+            embedded = false;
         }
 
         public MenuItemWrap(Page page) {
             open = MenuItem.this.getPage() != null && MenuItem.this.getPage().equals(page);
+            embedded = page != null && page.isEmbedded();
             children =
-                    ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible)
+                    ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().filter(m-> m.isVisible() && !m.isEmbedded())
                             .map(menuItem -> menuItem.makeWrap(page)).collect(Collectors.toList()));
             active = open || children.stream().anyMatch(item -> ((MenuItemWrap) item).open || ((MenuItemWrap) item).active);
         }
@@ -274,6 +277,10 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         public boolean isOpen() {
             return open;
         }
+        
+        public boolean isEmbedded() {
+            return embedded;
+        }
 
         public boolean isFolder() {
             return MenuItem.this.getFolder();
@@ -296,5 +303,9 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     public boolean isVisible() {
         return getPage() == null || getPage().getPublished();
+    }
+    
+    public boolean isEmbedded() {
+        return getPage() != null && getPage().isEmbedded();
     }
 }
