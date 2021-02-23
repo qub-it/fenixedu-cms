@@ -92,7 +92,7 @@ public class CMSRenderer {
 
     public CMSRenderer() {
         if(CMSConfigurationManager.isInThemeDevelopmentMode()){
-            logger.info("CMS Theme Development Mode enabled!");
+            logger.debug("CMS Theme Development Mode enabled!");
         }
     }
 

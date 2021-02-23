@@ -18,7 +18,19 @@
  */
 package org.fenixedu.cms.domain;
 
-import com.google.common.collect.ImmutableList;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -37,13 +49,10 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
+
 import pt.ist.fenixframework.Atomic;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * A post models a given content to be presented to the user.
@@ -56,13 +65,13 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     public static final String SIGNAL_ARCHIVED = "fenixedu.cms.post.archived";
     public static final String SIGNAL_RECOVERED = "fenixedu.cms.post.recovered";
 
-
     public static final Comparator<Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate).reversed();
 
     private static final Logger logger = LoggerFactory.getLogger(Post.class);
-    
+
     /**
      * The logged {@link User} creates a new Post.
+     *
      * @param site site
      */
     public Post(Site site) {
@@ -114,10 +123,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
      */
     @Override
     public boolean isValidSlug(String slug) {
-        Post p = getSite().getArchivedPostsSet().stream()
-                .filter(post -> post.getSlug() != null)
-                .filter(post -> post.getSlug().equals(slug))
-                .findAny().orElse(getSite().postForSlug(slug));
+        Post p = getSite().getArchivedPostsSet().stream().filter(post -> post.getSlug() != null)
+                .filter(post -> post.getSlug().equals(slug)).findAny().orElse(getSite().postForSlug(slug));
 
         return p == null || p == this;
     }
@@ -138,8 +145,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     @Atomic
     public void delete() {
-        logger.info("Post " + getSlug()  + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " deleted by user "+ Authenticate.getUser().getUsername());
+        logger.debug("Post " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() + " deleted by user "
+                + Authenticate.getUser().getUsername());
         Signal.emit(SIGNAL_DELETED, this.getOid());
 
         setCreatedBy(null);
@@ -151,8 +158,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         getComponentSet().stream().forEach(Component::delete);
         getCategoriesSet().stream().forEach(category -> category.removePosts(this));
         getRevisionsSet().stream().forEach(PostContentRevision::delete);
-    
-    
+
         deleteDomainObject();
     }
 
@@ -212,8 +218,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
                 .forEach(file -> file.setAccessGroup(group));
     }
 
-    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, LocalizedString excerpt, Category category, boolean active,
-                              User creator) {
+    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, LocalizedString excerpt,
+            Category category, boolean active, User creator) {
         Post post = new Post(site);
         post.setName(name);
         post.setBodyAndExcerpt(body, excerpt);
@@ -247,9 +253,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
             List<PostFile> files = new ArrayList<>(getFilesSorted());
             Post clone = new Post(getSite());
             cloneCache.setClone(Post.this, clone);
-            clone.setBodyAndExcerpt(getBody() != null ? fromJson(getBody().json()) : null, getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
+            clone.setBodyAndExcerpt(getBody() != null ? fromJson(getBody().json()) : null,
+                    getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
             clone.setName(getName() != null ? fromJson(getName().json()) : null);
-            clone.setBodyAndExcerpt(getBody() != null ? fromJson(getBody().json()) : null, getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
+            clone.setBodyAndExcerpt(getBody() != null ? fromJson(getBody().json()) : null,
+                    getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
             clone.setLocation(getLocation() != null ? fromJson(getLocation().json()) : null);
             clone.setMetadata(getMetadata() != null ? getMetadata().clone() : null);
             clone.setCanViewGroup(getCanViewGroup());
@@ -330,10 +338,9 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         setLatestRevision(pcr);
 
         setModificationDate(new DateTime());
-    
-    
-        logger.info("New post revision " + getSlug()  + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " created by user "+ Authenticate.getUser().getUsername());
+
+        logger.debug("New post revision " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug()
+                + " created by user " + Authenticate.getUser().getUsername());
     }
 
     public LocalizedString getExcerpt() {
@@ -392,7 +399,6 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     public boolean isStaticPost() {
         return getComponentSet().stream().filter(component -> StaticPost.class.isInstance(component)).findAny().isPresent();
     }
-
 
     public class PostWrap extends Wrap {
 
@@ -460,7 +466,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         public List<Wrap> getAttachments() {
             return getAttachmentFilesSorted().map(PostFile::makeWrap).collect(Collectors.toList());
         }
-        
+
         public Wrap getMetadata() {
             return Post.this.getMetadata().makeWrap();
         }

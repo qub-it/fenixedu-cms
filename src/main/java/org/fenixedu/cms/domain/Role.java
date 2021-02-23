@@ -27,9 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Role extends Role_Base {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Role.class);
-    
+
     public static final String SIGNAL_CREATED = "fenixedu.cms.role.created";
     public static final String SIGNAL_DELETED = "fenixedu.cms.role.deleted";
     public static final String SIGNAL_EDITED = "fenixedu.cms.role.edited";
@@ -38,33 +38,33 @@ public class Role extends Role_Base {
         setRoleTemplate(template);
         setSite(site);
         setGroup(Group.nobody());
-        Signal.emit(SIGNAL_CREATED,new DomainObjectEvent<>(this));
+        Signal.emit(SIGNAL_CREATED, new DomainObjectEvent<>(this));
     }
 
     public void delete() {
-        logger.info("Role " + getName().getContent() + " -  " + getExternalId() +
-                " deleted by user " + Authenticate.getUser().getUsername());
+        logger.debug("Role " + getName().getContent() + " -  " + getExternalId() + " deleted by user "
+                + Authenticate.getUser().getUsername());
         Signal.emit(SIGNAL_DELETED, this.getOid());
         setRoleTemplate(null);
         setSite(null);
         setPersistentGroup(null);
         super.deleteDomainObject();
     }
-    
+
     public void setGroup(Group group) {
-        logger.info("Role " + getName().getContent() + " - " + getExternalId() +
-                " changed to " + group.getExpression() + " by user "+ Authenticate.getUser().getUsername());
+        logger.debug("Role " + getName().getContent() + " - " + getExternalId() + " changed to " + group.getExpression()
+                + " by user " + Authenticate.getUser().getUsername());
         setPersistentGroup(group.toPersistentGroup());
     }
-    
-    public Group getGroup(){
-        if(getPersistentGroup()==null){
+
+    public Group getGroup() {
+        if (getPersistentGroup() == null) {
             return Group.nobody();
         }
         return getPersistentGroup().toGroup();
     }
-    
+
     public LocalizedString getName() {
-        return getRoleTemplate() !=null ? getRoleTemplate().getName() : new LocalizedString();
+        return getRoleTemplate() != null ? getRoleTemplate().getName() : new LocalizedString();
     }
 }

@@ -18,7 +18,14 @@
  */
 package org.fenixedu.cms.domain;
 
-import com.google.common.collect.Sets;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.signals.DomainObjectEvent;
 import org.fenixedu.bennu.core.signals.Signal;
@@ -30,29 +37,24 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
 /**
  * Model of a Menu for a given {@link Page}
  */
-public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, Comparable<Menu>{
+public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, Comparable<Menu> {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.menu.created";
     public static final String SIGNAL_DELETED = "fenixedu.cms.menu.deleted";
     public static final String SIGNAL_EDITED = "fenixedu.cms.menu.edited";
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Menu.class);
-    
+
     public Menu(Site site, LocalizedString name) {
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
@@ -78,8 +80,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
 
     @Atomic
     public void delete() {
-        logger.info("Menu " + getName()  + " - " + getExternalId() +" of site " + getSite().getSlug() +
-                " deleted by user "+ Authenticate.getUser().getUsername());
+        logger.debug("Menu " + getName() + " - " + getExternalId() + " of site " + getSite().getSlug() + " deleted by user "
+                + Authenticate.getUser().getUsername());
         Signal.emit(Menu.SIGNAL_DELETED, new DomainObjectEvent<>(this));
         Sets.newHashSet(getItemsSet()).stream().distinct().forEach(MenuItem::delete);
         this.setCreatedBy(null);
@@ -221,7 +223,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
             return children;
         }
 
-        public int getOrder(){
+        public int getOrder() {
             return Menu.this.getOrder();
         }
 
@@ -250,14 +252,14 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
 
     public MenuItem menuItemForOid(String menuItemOid) {
         MenuItem menuItem = FenixFramework.getDomainObject(menuItemOid);
-        if(menuItem != null && FenixFramework.isDomainObjectValid(menuItem) && menuItem.getMenu() == this) {
+        if (menuItem != null && FenixFramework.isDomainObjectValid(menuItem) && menuItem.getMenu() == this) {
             return menuItem;
         }
         return null;
     }
 
     @ConsistencyPredicate
-    public boolean checkMenuOrder(){
-        return getOrder() != null && !(getOrder()<0);
+    public boolean checkMenuOrder() {
+        return getOrder() != null && !(getOrder() < 0);
     }
 }

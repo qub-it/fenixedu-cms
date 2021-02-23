@@ -61,7 +61,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
 
     /**
      * the logged {@link User} creates a new Page.
-     * 
+     *
      * @param site site
      * @param name name
      */
@@ -139,22 +139,22 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
 
     @Override
     public void removeComponents(Component components) {
-        logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " component " + components.getType() + " removed by user "+ Authenticate.getUser().getUsername());
+        logger.debug("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() + " component "
+                + components.getType() + " removed by user " + Authenticate.getUser().getUsername());
         super.removeComponents(components);
     }
 
     @Override
     public void addComponents(Component components) {
-        logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " component " + components.getType() + " added by user "+ Authenticate.getUser().getUsername());
+        logger.debug("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() + " component "
+                + components.getType() + " added by user " + Authenticate.getUser().getUsername());
         super.addComponents(components);
     }
 
     @Atomic
     public void delete() {
-        logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " deleted by user "+ Authenticate.getUser().getUsername());
+        logger.debug("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() + " deleted by user "
+                + Authenticate.getUser().getUsername());
         Signal.emit(SIGNAL_DELETED, this.getOid());
 
         for (Component component : getComponentsSet()) {
@@ -258,7 +258,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             setTemplateType(null);
         }
 
-        logger.info(
+        logger.debug(
                 "Page " + getSlug() + " of Site " + getSite().getSlug() + " template changed by user " + Authenticate.getUser());
     }
 
@@ -351,7 +351,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             return clone;
         });
     }
-    
+
     public boolean isEmbedded() {
         return getEmbedded();
     }

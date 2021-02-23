@@ -18,8 +18,14 @@
  */
 package org.fenixedu.cms.domain;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.signals.DomainObjectEvent;
@@ -30,16 +36,12 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * Models the items of a {@link Menu}
@@ -51,11 +53,12 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     public static final String SIGNAL_CREATED = "fenixedu.cms.menuItem.created";
     public static final String SIGNAL_DELETED = "fenixedu.cms.menuItem.deleted";
     public static final String SIGNAL_EDITED = "fenixedu.cms.menuItem.edited";
-    
+
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MenuItem.class);
-    
+
     /**
      * The logged {@link User} creates a new MenuItem.
+     *
      * @param menu menu
      */
     public MenuItem(Menu menu) {
@@ -79,7 +82,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     /**
      * Adds a children at a given position and shifts the existing items.
      *
-     * @param item     the {@link MenuItem} to be added.
+     * @param item the {@link MenuItem} to be added.
      * @param position the position where the item should be added.
      */
     public void putAt(MenuItem item, int position) {
@@ -165,6 +168,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     /**
      * A MenuItem can not be linked with a {@link Menu} and a {@link MenuItem} at the same time
+     *
      * @return if is parent or top
      */
     @ConsistencyPredicate
@@ -174,9 +178,8 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     @Atomic
     public void delete() {
-        logger.info("Menu item " + getName().toString()  + " - " + getExternalId()
-                + " of site " + getMenu().getSite().getSlug()
-                + " deleted by user "+ Authenticate.getUser().getUsername());
+        logger.debug("Menu item " + getName().toString() + " - " + getExternalId() + " of site " + getMenu().getSite().getSlug()
+                + " deleted by user " + Authenticate.getUser().getUsername());
         Signal.emit(MenuItem.SIGNAL_DELETED, new DomainObjectEvent<>(this.getMenu()));
         List<MenuItem> items = Lists.newArrayList(getChildrenSet());
         removeFromParent();
@@ -241,9 +244,8 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         private final List<Wrap> children;
 
         public MenuItemWrap() {
-            children =
-                    MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible).map((menuItem) -> menuItem.makeWrap())
-                    .collect(Collectors.toList());
+            children = MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible)
+                    .map((menuItem) -> menuItem.makeWrap()).collect(Collectors.toList());
             active = false;
             open = false;
             embedded = false;
@@ -253,7 +255,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
             open = MenuItem.this.getPage() != null && MenuItem.this.getPage().equals(page);
             embedded = page != null && page.isEmbedded();
             children =
-                    ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().filter(m-> m.isVisible() && !m.isEmbedded())
+                    ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().filter(m -> m.isVisible() && !m.isEmbedded())
                             .map(menuItem -> menuItem.makeWrap(page)).collect(Collectors.toList()));
             active = open || children.stream().anyMatch(item -> ((MenuItemWrap) item).open || ((MenuItemWrap) item).active);
         }
@@ -277,7 +279,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         public boolean isOpen() {
             return open;
         }
-        
+
         public boolean isEmbedded() {
             return embedded;
         }
@@ -304,7 +306,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     public boolean isVisible() {
         return getPage() == null || getPage().getPublished();
     }
-    
+
     public boolean isEmbedded() {
         return getPage() != null && getPage().isEmbedded();
     }
