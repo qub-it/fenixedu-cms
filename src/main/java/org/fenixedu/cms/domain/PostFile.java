@@ -79,7 +79,11 @@ public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wra
         Signal.emit(SIGNAL_DELETED, this.getOid());
         setSite(null);
         setPost(null);
-        setFiles(null);
+        if (getFiles() != null) {
+            final GroupBasedFile fileToDelete = getFiles();
+            setFiles(null);
+            fileToDelete.delete();
+        }
         deleteDomainObject();
     }
 
