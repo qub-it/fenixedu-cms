@@ -44,7 +44,8 @@ public class Sanitization {
             .onElements("th").allowAttributes("colspan").onElements("th").allowAttributes("rowspan").onElements("th")
             .allowAttributes("scope").onElements("th").allowAttributes("width").onElements("th").allowAttributes("type")
             .onElements("ul").allowAttributes("class", "color").onElements("iframe")
-            .allowAttributes("width", "height", "src", "allow", "allowfullscreen").globally().toFactory();
+            .allowAttributes("width", "height", "src", "allow", "allowfullscreen").onElements("font")
+            .allowAttributes("color", "face", "size").globally().toFactory();
 
     private static PolicyFactory STRICT_SANITIZER = new HtmlPolicyBuilder().toFactory();
 
