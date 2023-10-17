@@ -108,7 +108,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         setDescription(description);
 
         setPublished(false);
-        setAnalytics(new SiteAnalytics());
 
         Signal.emit(Site.SIGNAL_CREATED, new DomainObjectEvent<>(this));
     }
@@ -392,7 +391,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         setTheme(null);
         setCreatedBy(null);
         setBennu(null);
-        setAnalytics(null);
         setBuilder(null);
         setDefaultRoleTemplate(null);
 

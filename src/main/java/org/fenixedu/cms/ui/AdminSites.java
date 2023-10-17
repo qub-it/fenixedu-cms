@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 
 import org.apache.tika.io.FilenameUtils;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -52,8 +53,6 @@ import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.bennu.core.signals.DomainObjectEvent;
 import org.fenixedu.bennu.core.signals.Signal;
-import org.fenixedu.bennu.social.domain.api.GoogleAPI;
-import org.fenixedu.bennu.social.domain.user.GoogleUser;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.cms.domain.CMSFolder;
@@ -85,15 +84,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.analytics.Analytics;
-import com.google.api.services.analytics.model.Account;
-import com.google.api.services.analytics.model.Accounts;
-import com.google.api.services.analytics.model.Webproperties;
-import com.google.api.services.analytics.model.Webproperty;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
@@ -239,17 +229,8 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "/{slug}/analytics", method = RequestMethod.GET, produces = JSON)
-    public @ResponseBody String viewSiteAnalyticsData(@PathVariable String slug) {
-        Site site = Site.fromSlug(slug);
-        ensureCanDoThis(site, Permission.MANAGE_ANALYTICS);
-        return site.getAnalytics().getOrFetch(site).toString();
-    }
-
-    private Analytics getUserAnalytics() {
-        GoogleCredential credential =
-                GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser()).get().getAuthenticatedSDK();
-        return new Analytics.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential).setApplicationName(
-                PortalConfiguration.getInstance().getApplicationTitle().getContent(Locale.ENGLISH)).build();
+    public Response viewSiteAnalyticsData(@PathVariable String slug) {
+        return Response.status(400).build();
     }
 
     @RequestMapping(value = "/{slug}/export", method = RequestMethod.GET)
@@ -341,35 +322,6 @@ public class AdminSites {
             if (CmsSettings.getInstance().canManageSettings()) {
                 model.addAttribute("defaultSite", Bennu.getInstance().getDefaultSite());
             }
-            if (PermissionEvaluation.canDoThis(site, Permission.MANAGE_ANALYTICS)) {
-                model.addAttribute("google", GoogleAPI.getInstance());
-
-                GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser())
-                        .ifPresent(googleUser -> {
-                            Analytics analytics = getUserAnalytics();
-                            List<GoogleAccountBean> googleAccountBeans = new ArrayList<>();
-                            try {
-                                Accounts accounts = analytics.management().accounts().list().execute();
-                                for (Account account : accounts.getItems()) {
-                                    Webproperties
-                                            properties =
-                                            analytics.management().webproperties().list(account.getId())
-                                                    .execute();
-                                    googleAccountBeans.add(new GoogleAccountBean(account, properties));
-                                }
-                                model.addAttribute("googleUser", googleUser);
-                                model.addAttribute("accounts", googleAccountBeans);
-                            } catch (GoogleJsonResponseException e) {
-                                LOGGER.error("Error loading analytics properties", e);
-                                if (e.getDetails().getCode() == 401) {
-                                    //Invalid credentials -> remove invalid user
-                                    FenixFramework.atomic(() -> googleUser.delete());
-                                }
-                            } catch (IOException e) {
-                                LOGGER.error("Error loading analytics properties", e);
-                            }
-                        });
-            }
         }
     }
 
@@ -422,16 +374,6 @@ public class AdminSites {
                 s.setSlug(slug);
                 s.updateMenuFunctionality();
             }
-        }
-
-        if (PermissionEvaluation.canDoThis(s, Permission.MANAGE_ANALYTICS)) {
-            Optional<GoogleUser> googleUser = GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser());
-            if ((Strings.isNullOrEmpty(analyticsCode) || Strings.isNullOrEmpty(accountId)) && googleUser.isPresent()) {
-                googleUser.get().delete();
-            }
-            s.setAnalyticsCode(analyticsCode);
-            s.setAnalyticsAccountId(accountId);
-            s.getAnalytics().update(s);
         }
 
         if (PermissionEvaluation.canDoThis(s, Permission.PUBLISH_SITE)) {
@@ -552,44 +494,6 @@ public class AdminSites {
         CmsSettings.getInstance().ensureCanManageRoles();
         FenixFramework.atomic(() -> ((Role) FenixFramework.getDomainObject(roleId)).delete());
         return new RedirectView("/cms/sites/" + slugSite + "/roles", true);
-    }
-
-    public static class GoogleAccountBean {
-        private final Account account;
-        private final Webproperties properties;
-
-        public GoogleAccountBean(Account account, Webproperties properties) {
-            this.account = account;
-            this.properties = properties;
-        }
-
-        public String getName() {
-            return account.getName();
-        }
-
-        public String getId() {
-            return account.getId();
-        }
-
-        public List<GoogleAccountProperty> getProperties() {
-            return properties.getItems().stream().map(GoogleAccountProperty::new).collect(toList());
-        }
-    }
-
-    public static class GoogleAccountProperty {
-        private final Webproperty webproperty;
-
-        public GoogleAccountProperty(Webproperty webproperty) {
-            this.webproperty = webproperty;
-        }
-
-        public String getName() {
-            return webproperty.getName();
-        }
-
-        public String getId() {
-            return webproperty.getId();
-        }
     }
 
 }

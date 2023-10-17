@@ -1,6 +1,5 @@
 package org.fenixedu.cms.ui;
 
-import com.restfb.experimental.api.Groups;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
