@@ -37,11 +37,9 @@ x * Copyright © 2014 Instituto Superior Técnico
 package org.fenixedu.cms.ui;
 
 import com.google.common.base.Strings;
-import org.fenixedu.bennu.core.domain.NashornStrategy;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSFolder;
-import org.fenixedu.cms.domain.CMSFolder.FolderResolver;
 import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.http.HttpStatus;
@@ -81,8 +79,6 @@ public class AdminFolders {
             atomic(() -> {
                 if (Strings.isNullOrEmpty(code)) {
                     folder.setResolver(null);
-                } else {
-                    folder.setResolver(new NashornStrategy<>(FolderResolver.class, code));
                 }
                 return null;
             });
