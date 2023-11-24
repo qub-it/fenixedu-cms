@@ -77,9 +77,6 @@ public class AdminFolders {
         CmsSettings.getInstance().ensureCanManageFolders();
         try {
             atomic(() -> {
-                if (Strings.isNullOrEmpty(code)) {
-                    folder.setResolver(null);
-                }
                 return null;
             });
         } catch (Exception e) {

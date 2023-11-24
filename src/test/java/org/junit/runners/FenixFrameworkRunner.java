@@ -18,6 +18,5 @@ public class FenixFrameworkRunner extends BlockJUnit4ClassRunner {
         // TODO Auto-generated method stub
         super.runChild(method, notifier);
     }
-    
-    
+
 }
