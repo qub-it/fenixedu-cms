@@ -1,0 +1,2 @@
+- Improvement: Adds fenixedu OSS DM [#qubIT-Omnis-4736]
+- Improvement: Removes reference to DomainExceptionMapper in tests [#qubIT-Omnis-4736]
