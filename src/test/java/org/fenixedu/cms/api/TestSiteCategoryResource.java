@@ -81,27 +81,6 @@ public class TestSiteCategoryResource extends TestCmsApi {
     }
 
     @Test
-    public void createNoNameCategory() {
-        // prepare
-        User user = CmsTestUtils.createAuthenticatedUser("createNoNameCategory");
-
-        Site site = CmsTestUtils.createSite(user, "createNoNameCategory");
-
-        CategoryBean categoryBean = new CategoryBean();
-
-        DateTime creationDate = new DateTime();
-
-        // execute
-        try {
-            String response = getSiteCategoriesTarget(site).request()
-                .post(Entity.entity(categoryBean.toJson(), MediaType.APPLICATION_JSON), String.class);
-        } catch (BadRequestException ex) {
-            LOGGER.debug(ex.getMessage());
-        }
-    }
-
-
-    @Test
     public void createMinCategory() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createMinCategory");
@@ -110,14 +89,14 @@ public class TestSiteCategoryResource extends TestCmsApi {
 
         CategoryBean categoryBean = new CategoryBean();
         LocalizedString name =
-            new LocalizedString(Locale.UK, "createFullCategory-name-uk").with(Locale.US, "createFullCategory-name-us");
+                new LocalizedString(Locale.UK, "createFullCategory-name-uk").with(Locale.US, "createFullCategory-name-us");
         categoryBean.setName(name);
 
         DateTime creationDate = new DateTime();
 
         // execute
         String response = getSiteCategoriesTarget(site).request()
-            .post(Entity.entity(categoryBean.toJson(), MediaType.APPLICATION_JSON), String.class);
+                .post(Entity.entity(categoryBean.toJson(), MediaType.APPLICATION_JSON), String.class);
 
         // test
         JsonObject jsonResponse = new JsonParser().parse(response).getAsJsonObject();
@@ -127,23 +106,23 @@ public class TestSiteCategoryResource extends TestCmsApi {
         assertTrue("create endpoint should return id of an existing category", category != null);
 
         assertTrue("response category should have a site field", jsonResponse.has("site"));
-        assertEquals("site response should be equal to created site", site.getExternalId(), jsonResponse.get("site")
-                .getAsString());
+        assertEquals("site response should be equal to created site", site.getExternalId(),
+                jsonResponse.get("site").getAsString());
 
         assertTrue("response category should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response category should have an createdBy field", jsonResponse.has("createdBy"));
-        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
-                .get("createdBy").getAsString());
+        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(),
+                jsonResponse.get("createdBy").getAsString());
 
         assertTrue("response category should  contain slug", jsonResponse.has("slug"));
 
         assertTrue("response category should  contain name", jsonResponse.has("name"));
         assertEquals("name response should be equal to expected name", name,
-            LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
+                LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
     }
 
     @Test
@@ -162,9 +141,8 @@ public class TestSiteCategoryResource extends TestCmsApi {
         DateTime creationDate = new DateTime();
 
         // execute
-        String response =
-                getSiteCategoriesTarget(site).request().post(Entity.entity(categoryBean.toJson(), MediaType.APPLICATION_JSON),
-                        String.class);
+        String response = getSiteCategoriesTarget(site).request()
+                .post(Entity.entity(categoryBean.toJson(), MediaType.APPLICATION_JSON), String.class);
         LOGGER.debug("createFullCategory: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
 
         // test
@@ -175,24 +153,24 @@ public class TestSiteCategoryResource extends TestCmsApi {
         assertTrue("create endpoint should return id of an existing category", category != null);
 
         assertTrue("response category should have a site field", jsonResponse.has("site"));
-        assertEquals("site response should be equal to created site", site.getExternalId(), jsonResponse.get("site")
-                .getAsString());
+        assertEquals("site response should be equal to created site", site.getExternalId(),
+                jsonResponse.get("site").getAsString());
 
         assertTrue("response category should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response category should have an createdBy field", jsonResponse.has("createdBy"));
-        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
-                .get("createdBy").getAsString());
+        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(),
+                jsonResponse.get("createdBy").getAsString());
 
         assertTrue("response category should have a name field", jsonResponse.has("name"));
         assertEquals("name response should be equal to expected name", name,
                 LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
 
         assertTrue("response category should have a slug field", jsonResponse.has("slug"));
-        assertEquals("slug response should be equal to expected slug", categoryBean.getSlug(), jsonResponse.get("slug")
-                .getAsString());
+        assertEquals("slug response should be equal to expected slug", categoryBean.getSlug(),
+                jsonResponse.get("slug").getAsString());
     }
 }

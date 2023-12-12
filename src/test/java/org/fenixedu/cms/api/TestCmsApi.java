@@ -12,6 +12,7 @@ import org.fenixedu.bennu.core.rest.JsonBodyReaderWriter;
 import org.fenixedu.cms.api.json.*;
 import org.fenixedu.cms.api.resource.*;
 import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -39,7 +40,7 @@ public class TestCmsApi extends JerseyTest {
     protected Application configure() {
         return new ResourceConfig(DomainObjectParamConverter.class, SiteResource.class, PostResource.class,
                 RevisionResource.class, PageResource.class, CategoryResource.class, MenuResource.class, MenuItemResource.class,
-                ThemeResource.class, JsonBodyReaderWriter.class);
+                ThemeResource.class, CmsDomainException.class, JsonBodyReaderWriter.class);
     }
 
     public static void ensure() {

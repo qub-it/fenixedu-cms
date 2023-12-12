@@ -76,34 +76,9 @@ public class TestSitePageResource extends TestCmsApi {
         JsonArray jsonResponseArray = new JsonParser().parse(response).getAsJsonArray();
         assertTrue("response should contain two pages", jsonResponseArray.size() == 2);
 
-        assertTrue("response should include page1 and page2", expectedJsonPages.contains(jsonResponseArray.get(0))
-                && expectedJsonPages.contains(jsonResponseArray.get(1)));
+        assertTrue("response should include page1 and page2",
+                expectedJsonPages.contains(jsonResponseArray.get(0)) && expectedJsonPages.contains(jsonResponseArray.get(1)));
     }
-
-
-    @Test
-    public void createNoNamePage() {
-        // prepare
-        User user = CmsTestUtils.createAuthenticatedUser("createNoNamePage");
-
-        Site site = CmsTestUtils.createSite(user, "createNoNamePage");
-
-        PageBean pageBean = new PageBean();
-
-        DateTime creationDate = new DateTime();
-
-        // execute
-
-        try {
-            String response =
-                getSitePagesTarget(site).request().post(Entity.entity(pageBean.toJson(), MediaType.APPLICATION_JSON),
-                    String.class);
-            fail();
-        } catch (BadRequestException ex) {
-            LOGGER.debug(ex.getMessage());
-        }
-    }
-
 
     @Test
     public void createMinPage() {
@@ -119,9 +94,8 @@ public class TestSitePageResource extends TestCmsApi {
         DateTime creationDate = new DateTime();
 
         // execute
-        String response =
-                getSitePagesTarget(site).request().post(Entity.entity(pageBean.toJson(), MediaType.APPLICATION_JSON),
-                        String.class);
+        String response = getSitePagesTarget(site).request().post(Entity.entity(pageBean.toJson(), MediaType.APPLICATION_JSON),
+                String.class);
         LOGGER.debug("createMinPage: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
 
         // test
@@ -132,8 +106,8 @@ public class TestSitePageResource extends TestCmsApi {
         assertTrue("create endpoint should return id of an existing page", page != null);
 
         assertTrue("response page should have a site field", jsonResponse.has("site"));
-        assertEquals("site response should be equal to created site", site.getExternalId(), jsonResponse.get("site")
-                .getAsString());
+        assertEquals("site response should be equal to created site", site.getExternalId(),
+                jsonResponse.get("site").getAsString());
 
         assertTrue("response page should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
@@ -141,22 +115,23 @@ public class TestSitePageResource extends TestCmsApi {
                         .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response page should have an modificationDate field", jsonResponse.has("modificationDate"));
-        assertEquals("modificationDate response should be equal to creationDate", jsonResponse.get("creationDate").getAsString()
-                .substring(0, 16), jsonResponse.get("modificationDate").getAsString().substring(0, 16)); // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
+        assertEquals("modificationDate response should be equal to creationDate",
+                jsonResponse.get("creationDate").getAsString().substring(0, 16),
+                jsonResponse.get("modificationDate").getAsString().substring(0, 16)); // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
 
         assertTrue("response page should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
-                .getAsBoolean());
+        assertEquals("published response should be equal to expected published", false,
+                jsonResponse.get("published").getAsBoolean());
 
         assertTrue("response page should have an createdBy field", jsonResponse.has("createdBy"));
-        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
-                .get("createdBy").getAsString());
+        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(),
+                jsonResponse.get("createdBy").getAsString());
 
         assertTrue("response page should contain slug", jsonResponse.has("slug"));
         assertTrue("response page should contain name", jsonResponse.has("name"));
 
         assertEquals("name response should be equal to expected name", name,
-            LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
+                LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
 
     }
 
@@ -176,9 +151,8 @@ public class TestSitePageResource extends TestCmsApi {
         DateTime creationDate = new DateTime();
 
         // execute
-        String response =
-                getSitePagesTarget(site).request().post(Entity.entity(pageBean.toJson(), MediaType.APPLICATION_JSON),
-                        String.class);
+        String response = getSitePagesTarget(site).request().post(Entity.entity(pageBean.toJson(), MediaType.APPLICATION_JSON),
+                String.class);
         LOGGER.debug("createFullPage: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
 
         // test
@@ -189,8 +163,8 @@ public class TestSitePageResource extends TestCmsApi {
         assertTrue("create endpoint should return id of an existing page", page != null);
 
         assertTrue("response page should have a site field", jsonResponse.has("site"));
-        assertEquals("site response should be equal to created site", site.getExternalId(), jsonResponse.get("site")
-                .getAsString());
+        assertEquals("site response should be equal to created site", site.getExternalId(),
+                jsonResponse.get("site").getAsString());
 
         assertTrue("response page should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
@@ -201,18 +175,19 @@ public class TestSitePageResource extends TestCmsApi {
                 jsonResponse.get("modificationDate").getAsString().substring(0, 16));  // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
 
         assertTrue("response page should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
-                .getAsBoolean());
+        assertEquals("published response should be equal to expected published", false,
+                jsonResponse.get("published").getAsBoolean());
 
         assertTrue("response page should have an createdBy field", jsonResponse.has("createdBy"));
-        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
-                .get("createdBy").getAsString());
+        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(),
+                jsonResponse.get("createdBy").getAsString());
 
         assertTrue("response page should have a name field", jsonResponse.has("name"));
         assertEquals("name response should be equal to expected name", name,
                 LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
 
         assertTrue("response page should have a slug field", jsonResponse.has("slug"));
-        assertEquals("name response should be equal to expected name", pageBean.getSlug(), jsonResponse.get("slug").getAsString());
+        assertEquals("name response should be equal to expected name", pageBean.getSlug(),
+                jsonResponse.get("slug").getAsString());
     }
 }

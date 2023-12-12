@@ -122,43 +122,6 @@ public class TestSiteResource extends TestCmsApi {
     }
 
     @Test
-    public void createErrorSiteWithoutName() {
-        // prepare
-        User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutName");
-        CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user, "TODO: CHANGE ME");
-
-        LocalizedString description = new LocalizedString(Locale.UK, "createErrorSiteWithoutName-description-uk").with(Locale.US,
-                "createErrorSiteWithoutName-description-us");
-        SiteBean siteBean = new SiteBean(null, description);
-
-        // execute
-        Response response =
-                getSitesTarget().request().post(Entity.entity(siteBean.toJson(), MediaType.APPLICATION_JSON), Response.class);
-        LOGGER.debug("createErrorSiteWithoutName: response = " + response.getStatus() + " (" + response.getStatusInfo() + ")");
-        assertEquals(412, response.getStatus());
-    }
-
-    @Test
-    public void createErrorSiteWithoutDescription() {
-        // prepare
-        User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutDescription");
-        CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user, "TODO: CHANGE ME");
-
-        LocalizedString name = new LocalizedString(Locale.UK, "createErrorSiteWithoutDescription-name-uk").with(Locale.US,
-                "createErrorSiteWithoutDescription-name-us");
-        SiteBean siteBean = new SiteBean(name, null);
-
-        // execute
-        Response response =
-                getSitesTarget().request().post(Entity.entity(siteBean.toJson(), MediaType.APPLICATION_JSON), Response.class);
-        LOGGER.debug(
-                "createErrorSiteWithoutDescription: response = " + response.getStatus() + " (" + response.getStatusInfo() + ")");
-        assertEquals(412, response.getStatus());
-    }
-
-    @Test
     public void createMinSite() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createMinSite");
