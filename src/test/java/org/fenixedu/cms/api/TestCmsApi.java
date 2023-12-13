@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.ManualGroupRegister;
 import org.fenixedu.bennu.core.json.JsonBuilder;
-import org.fenixedu.bennu.core.rest.DomainExceptionMapper;
 import org.fenixedu.bennu.core.rest.DomainObjectParamConverter;
 import org.fenixedu.bennu.core.rest.JsonAwareResource;
 import org.fenixedu.bennu.core.rest.JsonBodyReaderWriter;
@@ -40,7 +39,7 @@ public class TestCmsApi extends JerseyTest {
     protected Application configure() {
         return new ResourceConfig(DomainObjectParamConverter.class, SiteResource.class, PostResource.class,
                 RevisionResource.class, PageResource.class, CategoryResource.class, MenuResource.class, MenuItemResource.class,
-                ThemeResource.class, DomainExceptionMapper.class, JsonBodyReaderWriter.class);
+                ThemeResource.class, JsonBodyReaderWriter.class);
     }
 
     public static void ensure() {
