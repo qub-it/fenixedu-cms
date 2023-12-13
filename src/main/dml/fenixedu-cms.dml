@@ -56,7 +56,6 @@ class BlogSiteBuilder extends SystemSiteBuilder {
 public class PersistentSiteViewersGroup extends .org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 
 public class CMSFolder {
-    public NashornStrategy<CMSFolder.FolderResolver> resolver;
 }
 
 class Page{

@@ -76,54 +76,30 @@ public class TestSiteMenuResource extends TestCmsApi {
         JsonArray jsonResponseArray = new JsonParser().parse(response).getAsJsonArray();
         assertTrue("response should contain two menus", jsonResponseArray.size() == 2);
 
-        assertTrue("response should include menu1 and menu2", expectedJsonMenus.contains(jsonResponseArray.get(0))
-                && expectedJsonMenus.contains(jsonResponseArray.get(1)));
+        assertTrue("response should include menu1 and menu2",
+                expectedJsonMenus.contains(jsonResponseArray.get(0)) && expectedJsonMenus.contains(jsonResponseArray.get(1)));
     }
 
     @Test
-    public void createMenuNoName() {
+    public void createMinMenu() {
         // prepare
-        User user = CmsTestUtils.createAuthenticatedUser("createMenuNoName");
+        User user = CmsTestUtils.createAuthenticatedUser("createMinMenu");
 
-        Site site = CmsTestUtils.createSite(user, "createMenuNoName");
+        Site site = CmsTestUtils.createSite(user, "createMinMenu");
 
         MenuBean menuBean = new MenuBean();
+        LocalizedString name = new LocalizedString(Locale.UK, "createMinMenu-name-uk").with(Locale.US, "createMinMenu-name-us");
+        menuBean.setName(name);
 
         DateTime creationDate = new DateTime();
 
         // execute
-        LOGGER.debug("createMenuNoName: sending = " + menuBean.toJson().replaceAll("(\\r|\\n|\\t)", " "));
+        LOGGER.debug("createMinMenu: sending = " + menuBean.toJson().replaceAll("(\\r|\\n|\\t)", " "));
 
-        try {
-            String response =
-                getSiteMenusTarget(site).request().post(Entity.entity(menuBean.toJson(), MediaType.APPLICATION_JSON), String.class);
-            fail();
-        } catch (BadRequestException ex) {
-            LOGGER.debug(ex.getMessage());
-        }
+        String response = getSiteMenusTarget(site).request().post(Entity.entity(menuBean.toJson(), MediaType.APPLICATION_JSON),
+                String.class);
 
-    }
-        @Test
-        public void createMinMenu() {
-            // prepare
-            User user = CmsTestUtils.createAuthenticatedUser("createMinMenu");
-
-            Site site = CmsTestUtils.createSite(user, "createMinMenu");
-
-            MenuBean menuBean = new MenuBean();
-            LocalizedString name = new LocalizedString(Locale.UK, "createMinMenu-name-uk").with(Locale.US, "createMinMenu-name-us");
-            menuBean.setName(name);
-
-            DateTime creationDate = new DateTime();
-
-            // execute
-            LOGGER.debug("createMinMenu: sending = " + menuBean.toJson().replaceAll("(\\r|\\n|\\t)", " "));
-
-
-                String response =
-                    getSiteMenusTarget(site).request().post(Entity.entity(menuBean.toJson(), MediaType.APPLICATION_JSON), String.class);
-
-            LOGGER.debug("createMinMenu: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
+        LOGGER.debug("createMinMenu: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
 
         // test
         JsonObject jsonResponse = new JsonParser().parse(response).getAsJsonObject();
@@ -138,15 +114,15 @@ public class TestSiteMenuResource extends TestCmsApi {
         assertTrue("response menu should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response category should have an createdBy field", jsonResponse.has("createdBy"));
-        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
-                .get("createdBy").getAsString());
+        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(),
+                jsonResponse.get("createdBy").getAsString());
 
         assertTrue("response menu should have a site field", jsonResponse.has("site"));
-        assertEquals("site response should be equal to created site", site.getExternalId(), jsonResponse.get("site")
-                .getAsString());
+        assertEquals("site response should be equal to created site", site.getExternalId(),
+                jsonResponse.get("site").getAsString());
 
         assertTrue("response menu should have a menuItems field", jsonResponse.has("menuItems"));
         JsonArray menuItems = jsonResponse.get("menuItems").getAsJsonArray();
@@ -156,9 +132,9 @@ public class TestSiteMenuResource extends TestCmsApi {
 
         assertTrue("response category should contain name", jsonResponse.has("name"));
         assertEquals("response category name should be equal to name sent on bean", menuBean.getName(),
-            LocalizedString.fromJson(jsonResponse.get("name")));
+                LocalizedString.fromJson(jsonResponse.get("name")));
 
-        }
+    }
 
     @Test
     public void createFullMenu() {
@@ -176,9 +152,8 @@ public class TestSiteMenuResource extends TestCmsApi {
         DateTime creationDate = new DateTime();
 
         // execute
-        String response =
-                getSiteMenusTarget(site).request().post(Entity.entity(menuBean.toJson(), MediaType.APPLICATION_JSON),
-                        String.class);
+        String response = getSiteMenusTarget(site).request().post(Entity.entity(menuBean.toJson(), MediaType.APPLICATION_JSON),
+                String.class);
         LOGGER.debug("createFullMenu: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
 
         // test
@@ -194,15 +169,15 @@ public class TestSiteMenuResource extends TestCmsApi {
         assertTrue("response menu should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response category should have an createdBy field", jsonResponse.has("createdBy"));
-        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
-                .get("createdBy").getAsString());
+        assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(),
+                jsonResponse.get("createdBy").getAsString());
 
         assertTrue("response menu should have a site field", jsonResponse.has("site"));
-        assertEquals("site response should be equal to created site", site.getExternalId(), jsonResponse.get("site")
-                .getAsString());
+        assertEquals("site response should be equal to created site", site.getExternalId(),
+                jsonResponse.get("site").getAsString());
 
         assertTrue("response menu should have a menuItems field", jsonResponse.has("menuItems"));
         JsonArray menuItems = jsonResponse.get("menuItems").getAsJsonArray();
@@ -213,6 +188,7 @@ public class TestSiteMenuResource extends TestCmsApi {
                 LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
 
         assertTrue("response menu should have a slug field", jsonResponse.has("slug"));
-        assertEquals("slug response should be equal to expected slug", menuBean.getSlug(), jsonResponse.get("slug").getAsString());
+        assertEquals("slug response should be equal to expected slug", menuBean.getSlug(),
+                jsonResponse.get("slug").getAsString());
     }
 }

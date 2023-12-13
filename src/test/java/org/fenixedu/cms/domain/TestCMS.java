@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class TestCMS {
     private static final String USER_GROUP = "org.fenixedu.bennu.core.groups.UserGroup";
     private static final String USER_PARSER = "org.fenixedu.bennu.core.groups.UserGroup$UserArgumentParser";
-    private static Boolean run= false;
+    private static Boolean run = false;
     protected static final String DATETIME_PATTERN = "dd-MM-YYY HH:mm:ss";
     protected static final int DATETIME_EPSILON = 1;
 
@@ -28,7 +28,7 @@ public class TestCMS {
     @BeforeClass
     @Atomic(mode = TxMode.WRITE)
     public static void initObjects() throws ClassNotFoundException {
-        if(!run){
+        if (!run) {
             ensure();
         }
         run = true;

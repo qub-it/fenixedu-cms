@@ -50,7 +50,7 @@ public class FolderAdapter implements JsonAdapter<CMSFolder> {
             json.addProperty("path", folder.getFunctionality().getPath());
         }
 
-        json.addProperty("custom", folder.getResolver() != null);
+        json.addProperty("custom", false);
 
         return json;
     }

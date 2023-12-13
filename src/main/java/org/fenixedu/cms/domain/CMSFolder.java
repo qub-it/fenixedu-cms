@@ -39,9 +39,6 @@ public class CMSFolder extends CMSFolder_Base {
     }
 
     public Site resolveSite(String url) {
-        if (getResolver() != null) {
-            return getResolver().getStrategy().resolveSite(this, url);
-        }
         url = url.substring(getFunctionality().getFullPath().length());
         if (url.startsWith("/")) {
             url = url.substring(1);
@@ -66,9 +63,6 @@ public class CMSFolder extends CMSFolder_Base {
     }
 
     public String getBaseUrl(Site site) {
-        if (getResolver() != null) {
-            return getResolver().getStrategy().getBaseUrl(this, site);
-        }
         return getFunctionality().getFullPath().substring(1) + "/" + site.getSlug();
     }
 
