@@ -1,3 +1,4 @@
+3.4.0-FORK (09-04-2024)
 - Bug Fix: Fixes bug in sanitize method [#qubIT-Omnis-5704]
 - Improvement: Adds sanitization tests [#qubIT-Omnis-5704]
 - Improvement: Updates owasp java html sanitizer [#qubIT-Omnis-5704]
