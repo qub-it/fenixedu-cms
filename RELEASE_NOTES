@@ -1,2 +1,5 @@
+- Bug Fix: Fixes bug in sanitize method [#qubIT-Omnis-5704]
+- Improvement: Adds sanitization tests [#qubIT-Omnis-5704]
+- Improvement: Updates owasp java html sanitizer [#qubIT-Omnis-5704]
 - Improvement: Adds fenixedu OSS DM [#qubIT-Omnis-4736]
 - Improvement: Removes reference to DomainExceptionMapper in tests [#qubIT-Omnis-4736]

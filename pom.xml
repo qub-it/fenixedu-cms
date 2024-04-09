@@ -23,7 +23,6 @@
 		<version.com.google.apis.google-api-services-analytics>v3-rev136-1.22.0</version.com.google.apis.google-api-services-analytics>
 		<version.com.google.code.gson.gson>2.8.0</version.com.google.code.gson.gson>
 		<version.com.google.guava>21.0</version.com.google.guava>
-		<version.com.googlecode.owasp-java-html-sanitizer>20160924.1</version.com.googlecode.owasp-java-html-sanitizer>
 		<version.com.mitchellbosecke.pebble>2.3.0</version.com.mitchellbosecke.pebble>
 		<version.commons-io.commons-io>2.5</version.commons-io.commons-io>
 		<version.javax.servlet.jstl>1.2</version.javax.servlet.jstl>
@@ -110,6 +109,7 @@
 		<dependency>
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-core</artifactId>
+			<version>6.6.0-FORK</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
@@ -124,14 +124,17 @@
 		<dependency>
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-io</artifactId>
+			<version>6.6.0-FORK</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-portal</artifactId>
+			<version>6.6.0-FORK</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-spring</artifactId>
+			<version>6.6.0-FORK</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fenixedu</groupId>
@@ -155,17 +158,6 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>${version.javax.servlet.jstl}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
-			<artifactId>owasp-java-html-sanitizer</artifactId>
-			<version>${version.com.googlecode.owasp-java-html-sanitizer}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>jsr305</artifactId>
-					<groupId>com.google.code.findbugs</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ocpsoft.prettytime</groupId>
@@ -207,6 +199,7 @@
 		<dependency>
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-test</artifactId>
+			<version>6.6.0-FORK</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

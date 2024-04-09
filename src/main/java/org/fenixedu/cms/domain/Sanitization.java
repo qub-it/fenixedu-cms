@@ -60,7 +60,7 @@ public class Sanitization {
     public static LocalizedString strictSanitize(LocalizedString origin) {
         LocalizedString result = new LocalizedString();
         for (Locale l : origin.getLocales()) {
-            result = result.with(l, sanitize(origin.getContent(l)));
+            result = result.with(l, strictSanitize(origin.getContent(l)));
         }
         return result;
     }
