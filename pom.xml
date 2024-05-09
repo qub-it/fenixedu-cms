@@ -133,11 +133,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.fenixedu</groupId>
-			<artifactId>bennu-spring</artifactId>
-			<version>6.6.0-FORK</version>
-		</dependency>
-		<dependency>
-			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-modular-rendering</artifactId>
 		</dependency>
 		<dependency>

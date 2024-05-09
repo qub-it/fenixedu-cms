@@ -25,17 +25,13 @@ import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.ComponentContextProvider.EmptyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ClassUtils;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -61,7 +57,8 @@ public class ComponentDescriptor {
         ComponentType ann = type.getAnnotation(ComponentType.class);
         this.name = ann.name();
         this.stateless = CMSComponent.class.isAssignableFrom(type);
-        this.filter = ClassUtils.getMethodIfAvailable(type, "supportsSite", Site.class);
+        // This method supportsSite is being used in fenixedu-learning CMS components
+        this.filter = getMethodIfAvailable(type, "supportsSite", Site.class);
         if (!this.stateless) {
             this.ctor = getCustomCtor(type);
             this.jsonCtor = getJsonCtor(type);
@@ -74,13 +71,59 @@ public class ComponentDescriptor {
         }
     }
 
+    public static void notNull(Object object, String message) {
+        if (object == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static Method getMethodIfAvailable(Class<?> clazz, String methodName, Class<?>... paramTypes) {
+        notNull(clazz, "Class must not be null");
+        notNull(methodName, "Method name must not be null");
+        if (paramTypes != null) {
+            try {
+                return clazz.getMethod(methodName, paramTypes);
+            } catch (NoSuchMethodException var9) {
+                return null;
+            }
+        } else {
+            Set<Method> candidates = new HashSet(1);
+            Method[] methods = clazz.getMethods();
+            Method[] var5 = methods;
+            int var6 = methods.length;
+
+            for(int var7 = 0; var7 < var6; ++var7) {
+                Method method = var5[var7];
+                if (methodName.equals(method.getName())) {
+                    candidates.add(method);
+                }
+            }
+
+            if (candidates.size() == 1) {
+                return (Method)candidates.iterator().next();
+            } else {
+                return null;
+            }
+        }
+    }
+
     private Constructor<?> getCustomCtor(Class<?> type) {
         for (Constructor<?> ctor : type.getDeclaredConstructors()) {
             if (ctor.isAnnotationPresent(DynamicComponent.class) && !isJsonConstructor(ctor)) {
                 return ctor;
             }
         }
-        return ClassUtils.getConstructorIfAvailable(type);
+        return getConstructorIfAvailable(type);
+    }
+
+    public static <T> Constructor<T> getConstructorIfAvailable(Class<T> clazz, Class<?>... paramTypes) {
+        notNull(clazz, "Class must not be null");
+
+        try {
+            return clazz.getConstructor(paramTypes);
+        } catch (NoSuchMethodException var3) {
+            return null;
+        }
     }
 
     private Constructor<?> getJsonCtor(Class<?> type) {
@@ -195,7 +238,7 @@ public class ComponentDescriptor {
         NUMBER {
             @Override
             public Object coerce(Class<?> type, String value) throws Exception {
-                return ClassUtils.getMethodIfAvailable(type, "valueOf", String.class).invoke(null, value);
+                return getMethodIfAvailable(type, "valueOf", String.class).invoke(null, value);
             }
         },
 
