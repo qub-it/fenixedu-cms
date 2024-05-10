@@ -71,6 +71,8 @@ public class ComponentDescriptor {
         }
     }
 
+    /************* Copied from Spring ClassUtils ***************/
+    // https://github.com/spring-projects/spring-framework/blob/main/spring-core/src/main/java/org/springframework/util/ClassUtils.java
     public static void notNull(Object object, String message) {
         if (object == null) {
             throw new IllegalArgumentException(message);
@@ -81,39 +83,33 @@ public class ComponentDescriptor {
         notNull(clazz, "Class must not be null");
         notNull(methodName, "Method name must not be null");
         if (paramTypes != null) {
-            try {
-                return clazz.getMethod(methodName, paramTypes);
-            } catch (NoSuchMethodException var9) {
-                return null;
-            }
+            return getMethodOrNull(clazz, methodName, paramTypes);
         } else {
-            Set<Method> candidates = new HashSet(1);
-            Method[] methods = clazz.getMethods();
-            Method[] var5 = methods;
-            int var6 = methods.length;
-
-            for(int var7 = 0; var7 < var6; ++var7) {
-                Method method = var5[var7];
-                if (methodName.equals(method.getName())) {
-                    candidates.add(method);
-                }
-            }
-
+            Set<Method> candidates = findMethodCandidatesByName(clazz, methodName);
             if (candidates.size() == 1) {
-                return (Method)candidates.iterator().next();
-            } else {
-                return null;
+                return candidates.iterator().next();
             }
+            return null;
         }
     }
 
-    private Constructor<?> getCustomCtor(Class<?> type) {
-        for (Constructor<?> ctor : type.getDeclaredConstructors()) {
-            if (ctor.isAnnotationPresent(DynamicComponent.class) && !isJsonConstructor(ctor)) {
-                return ctor;
+    private static Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
+        try {
+            return clazz.getMethod(methodName, paramTypes);
+        } catch (NoSuchMethodException ex) {
+            return null;
+        }
+    }
+
+    private static Set<Method> findMethodCandidatesByName(Class<?> clazz, String methodName) {
+        Set<Method> candidates = new HashSet<>(1);
+        Method[] methods = clazz.getMethods();
+        for (Method method : methods) {
+            if (methodName.equals(method.getName())) {
+                candidates.add(method);
             }
         }
-        return getConstructorIfAvailable(type);
+        return candidates;
     }
 
     public static <T> Constructor<T> getConstructorIfAvailable(Class<T> clazz, Class<?>... paramTypes) {
@@ -124,6 +120,17 @@ public class ComponentDescriptor {
         } catch (NoSuchMethodException var3) {
             return null;
         }
+    }
+
+    /*****************************************************************/
+
+    private Constructor<?> getCustomCtor(Class<?> type) {
+        for (Constructor<?> ctor : type.getDeclaredConstructors()) {
+            if (ctor.isAnnotationPresent(DynamicComponent.class) && !isJsonConstructor(ctor)) {
+                return ctor;
+            }
+        }
+        return getConstructorIfAvailable(type);
     }
 
     private Constructor<?> getJsonCtor(Class<?> type) {
@@ -256,7 +263,7 @@ public class ComponentDescriptor {
             }
 
             @Override
-            @SuppressWarnings({"unchecked", "rawtypes"})
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             public Object coerce(Class<?> type, String value) {
                 return Enum.valueOf((Class) type, value);
             }

@@ -535,4 +535,18 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         }
         return PermissionEvaluation.canDoThis(getSite(), permissions.toArray(new Permission[] {}));
     }
+
+    public void ensureCanEditPost() {
+        ensureCanEditPost(getSite());
+    }
+
+    public void ensureCanEditPost(Site site) {
+        PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_POSTS);
+        if (!Authenticate.getUser().equals(getCreatedBy())) {
+            PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_OTHERS_POSTS);
+        }
+        if (isVisible()) {
+            PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_POSTS_PUBLISHED);
+        }
+    }
 }

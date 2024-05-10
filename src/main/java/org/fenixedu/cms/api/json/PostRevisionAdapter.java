@@ -43,7 +43,7 @@ public class PostRevisionAdapter implements JsonAdapter<PostContentRevision> {
 
     @Override
     public JsonElement view(PostContentRevision revision, JsonBuilder ctx) {
-        AdminPosts.ensureCanEditPost(revision.getPost());
+        revision.getPost().ensureCanEditPost();
         JsonObject json = new JsonObject();
 
         json.add("body", ctx.view(revision.getBody(), LocalizedStringViewer.class));

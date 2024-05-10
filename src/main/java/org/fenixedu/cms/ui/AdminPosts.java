@@ -24,16 +24,28 @@ import org.fenixedu.cms.domain.PermissionsArray.Permission;
 
 public class AdminPosts {
 
+    /***
+     * Use {@link Post#ensureCanEditPost()} instead
+     * 
+     * @param post
+     */
+    @Deprecated
     public static void ensureCanEditPost(Post post) {
         ensureCanEditPost(post.getSite(), post);
     }
 
+    /***
+     * Use {@link Post#ensureCanEditPost(Site)} instead
+     * 
+     * @param post
+     */
+    @Deprecated
     public static void ensureCanEditPost(Site site, Post post) {
         PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_POSTS);
-        if(!Authenticate.getUser().equals(post.getCreatedBy())) {
+        if (!Authenticate.getUser().equals(post.getCreatedBy())) {
             PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_OTHERS_POSTS);
         }
-        if(post.isVisible()) {
+        if (post.isVisible()) {
             PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_POSTS_PUBLISHED);
         }
     }
