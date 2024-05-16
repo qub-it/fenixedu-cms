@@ -45,7 +45,7 @@ public class PostAdapter implements JsonAdapter<Post> {
 
     @Override
     public Post update(JsonElement json, Post post, JsonBuilder ctx) {
-        AdminPosts.ensureCanEditPost(post);
+        post.ensureCanEditPost();
         JsonObject jObj = json.getAsJsonObject();
 
         if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
@@ -65,11 +65,11 @@ public class PostAdapter implements JsonAdapter<Post> {
         if (jObj.has("body") && !jObj.get("body").isJsonNull() && jObj.get("body").isJsonObject()) {
             LocalizedString body = LocalizedString.fromJson(jObj.get("body"));
             LocalizedString excerpt = null;
-            if(jObj.has("excerpt") && !jObj.get("excerpt").isJsonNull() && jObj.get("excerpt").isJsonObject()) {
+            if (jObj.has("excerpt") && !jObj.get("excerpt").isJsonNull() && jObj.get("excerpt").isJsonObject()) {
                 excerpt = LocalizedString.fromJson(jObj.get("excerpt"));
             }
             if (!post.getBody().equals(body) || !post.getExcerpt().equals(excerpt)) {
-                post.setBodyAndExcerpt(body,excerpt);
+                post.setBodyAndExcerpt(body, excerpt);
             }
         }
 

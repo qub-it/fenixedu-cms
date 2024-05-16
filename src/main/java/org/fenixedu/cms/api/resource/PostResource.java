@@ -18,8 +18,29 @@
  */
 package org.fenixedu.cms.api.resource;
 
-import com.google.common.io.ByteStreams;
-import com.google.gson.JsonElement;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_OTHERS_POSTS;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_POSTS;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_POSTS_PUBLISHED;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_POSTS;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -29,24 +50,11 @@ import org.fenixedu.cms.api.json.PostFileAdapter;
 import org.fenixedu.cms.api.json.PostRevisionAdapter;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
-import org.fenixedu.cms.ui.AdminPosts;
+
+import com.google.gson.JsonElement;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.*;
 
 @Path("/cms/posts")
 public class PostResource extends BennuRestResource {
@@ -113,9 +121,8 @@ public class PostResource extends BennuRestResource {
 
     @Atomic(mode = TxMode.WRITE)
     public void createFileFromRequest(Post post, Part part) throws IOException {
-        AdminPosts.ensureCanEditPost(post);
-        GroupBasedFile groupBasedFile = new GroupBasedFile(part.getName(), part.getName(),
-                part.getInputStream(), Group.logged());
+        post.ensureCanEditPost();
+        GroupBasedFile groupBasedFile = new GroupBasedFile(part.getName(), part.getName(), part.getInputStream(), Group.logged());
 
         PostFile postFile = new PostFile(post, groupBasedFile, false, 0);
         post.addFiles(postFile);

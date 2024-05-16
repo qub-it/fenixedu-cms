@@ -18,35 +18,35 @@
  */
 package org.fenixedu.cms.ui;
 
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.CMSThemeFile;
-import org.joda.time.DateTime;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.HandlerMapping;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 
-@Controller
-@RequestMapping("/cms/assets")
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
+
+import org.fenixedu.cms.domain.CMSTheme;
+import org.fenixedu.cms.domain.CMSThemeFile;
+import org.joda.time.DateTime;
+
+@Path("/cms/assets")
 public class CMSAssetsController {
 
     private static final String expires = DateTime.now().plusYears(1).toString("E, d MMM yyyy HH:mm:ss z");
 
-    @RequestMapping("/{type}/{hash}/**")
-    public void asset(@PathVariable String type, @PathVariable String hash, HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+    @Path("/{type}/{hash}/{path:.*}")
+    @GET
+    public void asset(@PathParam("type") String type, @PathParam("hash") String hash, @PathParam("path") String path,
+            @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException {
         CMSTheme theme = CMSTheme.forType(type);
         if (theme == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, type);
             return;
         }
-        String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-        path = path.substring(("/cms/assets/" + theme.getType() + "/" + hash + "/").length());
+
         CMSThemeFile file = theme.fileForPath("static/" + path);
         if (file == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, path);
