@@ -41,7 +41,7 @@ public class UserWrap extends Wrap {
     }
 
     public String getAvatar() {
-        return user.map(x -> x.getProfile().getAvatarUrl()).orElse("");
+        return user.map(x -> x.getProfile().getFullAvatarUrl()).orElse("");
     }
 
     public boolean isAuthenticated() {

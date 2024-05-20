@@ -52,15 +52,15 @@ public class SiteActivityRender {
     public static void init() {
         attachRenderer("siteCreated", SiteActivityRender::siteCreated);
         attachRenderer("postCreated", SiteActivityRender::postCreated);
-        attachRenderer("postEdited",SiteActivityRender::postEdited);
-        attachRenderer("postDeleted",SiteActivityRender::postDeleted);
-        attachRenderer("postRecovered",SiteActivityRender::postRecovered);
+        attachRenderer("postEdited", SiteActivityRender::postEdited);
+        attachRenderer("postDeleted", SiteActivityRender::postDeleted);
+        attachRenderer("postRecovered", SiteActivityRender::postRecovered);
         attachRenderer("siteImported", SiteActivityRender::siteImported);
         attachRenderer("siteCloned", SiteActivityRender::siteCloned);
         attachRenderer("pageCreated", SiteActivityRender::pageCreated);
-        attachRenderer("pageEdited",SiteActivityRender::pageEdited);
-        attachRenderer("pageDeleted",SiteActivityRender::pageDeleted);
-        attachRenderer("pageRecovered",SiteActivityRender::pageRecovered);
+        attachRenderer("pageEdited", SiteActivityRender::pageEdited);
+        attachRenderer("pageDeleted", SiteActivityRender::pageDeleted);
+        attachRenderer("pageRecovered", SiteActivityRender::pageRecovered);
     }
 
     private static void siteImported(SiteActivity activity, Writer writer) {
@@ -119,7 +119,6 @@ public class SiteActivityRender {
         write(writer, obj.get("user").getAsString(), "created", postName);
     }
 
-
     private static void pageEdited(SiteActivity activity, Writer writer) {
         JsonElement el = activity.getContent();
         JsonObject obj = el.getAsJsonObject();
@@ -141,14 +140,13 @@ public class SiteActivityRender {
         write(writer, obj.get("user").getAsString(), "recovered", pageName);
     }
 
-
     private static void write(Writer writer, String username, String action, String content) {
         try {
             User user = User.findByUsername(username);
-            writer.write("<a href='#' class='avatar'><img src='"+ user.getProfile().getAvatarUrl() + "?s=32" +"' alt='"+ user.getProfile().getDisplayName()+"' /></a>");
+            writer.write("<a href='#' class='avatar'><img src='" + user.getProfile().getFullAvatarUrl() + "?s=32" + "' alt='"
+                    + user.getProfile().getDisplayName() + "' /></a>");
             writer.write(
-                "<p>" + "<strong>" + user.getProfile().getDisplayName() + "</strong> " + action
-                + " " + content + " </p>");
+                    "<p>" + "<strong>" + user.getProfile().getDisplayName() + "</strong> " + action + " " + content + " </p>");
         } catch (Exception e) {
             e.printStackTrace();
         }
