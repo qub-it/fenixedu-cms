@@ -30,10 +30,9 @@ public class Sanitization {
             .allowElements("a", "b", "blockquote", "br", "caption", "cite", "code", "col", "colgroup", "dd", "dl", "dt", "em",
                     "h1", "h2", "h3", "h4", "h5", "h6", "i", "iframe", "img", "li", "ol", "p", "pre", "q", "small", "strike",
                     "strong", "sub", "sup", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "u", "ul", "div", "font",
-                    "span")
-            .allowAttributes("href").onElements("a").allowAttributes("title").onElements("a").allowAttributes("cite")
-            .onElements("blockquote").allowAttributes("span").onElements("col").allowAttributes("width").onElements("col")
-            .allowAttributes("span").onElements("colgroup").allowAttributes("width").onElements("colgroup")
+                    "span").allowAttributes("href").onElements("a").allowAttributes("title").onElements("a")
+            .allowAttributes("cite").onElements("blockquote").allowAttributes("span").onElements("col").allowAttributes("width")
+            .onElements("col").allowAttributes("span").onElements("colgroup").allowAttributes("width").onElements("colgroup")
             .allowAttributes("align").onElements("img").allowAttributes("alt").onElements("img").allowAttributes("height")
             .onElements("img").allowAttributes("src").onElements("img").allowAttributes("title").onElements("img")
             .allowAttributes("width").onElements("img").allowAttributes("start").onElements("ol").allowAttributes("type")
@@ -43,8 +42,8 @@ public class Sanitization {
             .allowAttributes("width").onElements("td").allowAttributes("abbr").onElements("th").allowAttributes("axis")
             .onElements("th").allowAttributes("colspan").onElements("th").allowAttributes("rowspan").onElements("th")
             .allowAttributes("scope").onElements("th").allowAttributes("width").onElements("th").allowAttributes("type")
-            .onElements("ul").allowAttributes("class", "color").onElements("iframe")
-            .allowAttributes("width", "height", "src", "allow", "allowfullscreen").onElements("font")
+            .onElements("ul").allowAttributes("class", "color").onElements("font")
+            .allowAttributes("width", "height", "src", "allow", "allowfullscreen").onElements("iframe")
             .allowAttributes("color", "face", "size").globally().toFactory();
 
     private static PolicyFactory STRICT_SANITIZER = new HtmlPolicyBuilder().toFactory();
