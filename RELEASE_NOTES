@@ -1,3 +1,5 @@
+- Bug fix: Add missing menu update to menu item children when changing its parent's menu [#UL-ICS-1601]
+
 3.8.1-FORK (01-10-2025)
 - Bug fix: Correcting CMS HtmlPolicy regarding iframes [#UL-ISEG-8592]
 
