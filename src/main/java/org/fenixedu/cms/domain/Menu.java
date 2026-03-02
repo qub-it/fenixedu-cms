@@ -148,6 +148,14 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
 
         getToplevelItemsSet().add(item);
         getItemsSet().add(item);
+        updateItemChildren(item);
+    }
+
+    private void updateItemChildren(final MenuItem item) {
+        item.getChildrenSet().forEach(c -> {
+            c.setMenu(this);
+            updateItemChildren(c);
+        });
     }
 
     /**
