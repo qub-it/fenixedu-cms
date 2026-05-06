@@ -1,3 +1,5 @@
+- Refactor: Removes CmsBootstrapper [#qubIT-Fenix-8343]
+
 3.8.2-FORK (02-03-2026)
 - Bug fix: Add missing menu update to menu item children when changing its parent's menu [#UL-ICS-1601]
 
