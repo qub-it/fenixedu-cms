@@ -391,7 +391,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         setTheme(null);
         setCreatedBy(null);
         setBennu(null);
-        setBuilder(null);
         setDefaultRoleTemplate(null);
 
         getActivityLinesSet().stream().forEach(org.fenixedu.cms.domain.SiteActivity::delete);
