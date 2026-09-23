@@ -5,9 +5,9 @@ import org.fenixedu.cms.routing.CMSBackend;
 import org.fenixedu.cms.routing.CMSEmbeddedBackend;
 import org.fenixedu.cms.routing.CMSURLHandler;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
 
 @WebListener
 public class CmsBackendInitializer implements ServletContextListener {

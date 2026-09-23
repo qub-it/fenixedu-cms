@@ -29,9 +29,9 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 import static org.fenixedu.cms.domain.PermissionsArray.Permission.*;

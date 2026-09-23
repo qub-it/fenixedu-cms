@@ -9,9 +9,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.json.JsonBuilder;

@@ -1,3 +1,4 @@
+- Refactor: Migrate from javaee to jakarta [#qubIT-Omnis-10960]
 4.0.0-FORK (28-08-2026)
 - Refactor: Remove SiteBuilder logic [#qubIT-Fenix-9036]
 
