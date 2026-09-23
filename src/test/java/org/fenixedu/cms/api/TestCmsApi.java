@@ -19,8 +19,8 @@ import org.junit.BeforeClass;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Application;
 import java.util.stream.Stream;
 
 public class TestCmsApi extends JerseyTest {
