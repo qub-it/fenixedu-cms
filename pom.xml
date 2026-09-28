@@ -130,10 +130,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.fenixedu</groupId>
-			<artifactId>bennu-modular-rendering</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.fenixedu</groupId>
 			<artifactId>fenixedu-commons</artifactId>
 		</dependency>
 		<dependency>
