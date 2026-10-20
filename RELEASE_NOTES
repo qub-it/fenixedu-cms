@@ -1,3 +1,5 @@
+- Refactor: When setting post access group, only materialize its members if needed [#ISCTE-FENIXEDU-1366]
+
 4.0.1-FORK (28-09-2026)
 - Refactor: Removing the unnecessary dependency bennu-modular-rendering [#qubIT-Fenix-9496]
 

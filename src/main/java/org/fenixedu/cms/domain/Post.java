@@ -210,12 +210,16 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     @Atomic
     public void setCanViewGroup(Group group) {
         super.setViewGroup(group.toPersistentGroup());
-        Set<User> groupMembers = group.getMembers().collect(Collectors.toSet());
         getEmbeddedFilesSorted().forEach(postFile -> postFile.getFiles().setAccessGroup(group));
+
         //if the new group is more restricted then the attachment group is updated
-        getAttachmentFilesSorted().map(PostFile::getFiles)
-                .filter(file -> !file.getAccessGroup().getMembers().allMatch(groupMembers::contains))
-                .forEach(file -> file.setAccessGroup(group));
+        List<PostFile> attachmentFilesSorted = getAttachmentFilesSorted().toList();
+        if (!attachmentFilesSorted.isEmpty()) {
+            Set<User> groupMembers = group.getMembers().collect(Collectors.toSet());
+            attachmentFilesSorted.stream().map(PostFile::getFiles)
+                    .filter(file -> !file.getAccessGroup().getMembers().allMatch(groupMembers::contains))
+                    .forEach(file -> file.setAccessGroup(group));
+        }
     }
 
     public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, LocalizedString excerpt,
