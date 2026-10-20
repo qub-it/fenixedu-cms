@@ -1,3 +1,4 @@
+5.0.0-FORK (20-10-2026)
 - Refactor: When setting post access group, only materialize its members if needed [#ISCTE-FENIXEDU-1366]
 - Refactor: Migrate from javaee to jakarta [#qubIT-Omnis-10960]
 
