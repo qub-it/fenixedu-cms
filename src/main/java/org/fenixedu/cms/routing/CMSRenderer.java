@@ -18,19 +18,28 @@
  */
 package org.fenixedu.cms.routing;
 
-import com.google.common.base.Strings;
-import com.google.common.cache.CacheBuilder;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.LoaderException;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.ClasspathLoader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.cms.CMSConfigurationManager;
 import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
@@ -42,56 +51,78 @@ import org.fenixedu.commons.i18n.I18N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
+import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.cache.PebbleCache;
+import io.pebbletemplates.pebble.error.LoaderException;
+import io.pebbletemplates.pebble.error.PebbleException;
+import io.pebbletemplates.pebble.loader.ClasspathLoader;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Created by diutsu on 01/03/16.
  */
 public class CMSRenderer {
 
-    public interface RenderingPageHandler extends BiConsumer<Page, TemplateContext>{}
+    public interface RenderingPageHandler extends BiConsumer<Page, TemplateContext> {
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(CMSRenderer.class);
 
     private static final Set<RenderingPageHandler> HANDLERS = new HashSet<>();
 
-    private final PebbleEngine engine = new PebbleEngine.Builder().loader(new ClasspathLoader() {
-        @Override
-        public Reader getReader(String templateName) throws LoaderException {
-            String[] parts = templateName.split("/", 2);
+    public static class GuavaWrapperCache<K> implements PebbleCache<K, PebbleTemplate> {
+        final Cache<Object, PebbleTemplate> cache;
 
-            if (parts.length != 2) {
-                throw new IllegalArgumentException("Not a valid name: " + templateName);
-            }
-            CMSTheme theme = CMSTheme.forType(parts[0]);
-            if (theme == null) {
-                throw new IllegalArgumentException("Theme " + parts[0] + " not found!");
-            }
-
-            byte[] bytes = theme.contentForPath(parts[1]);
-            if (bytes == null) {
-                throw new IllegalArgumentException("Theme " + parts[0] + " does not contain resource '" + parts[1] + '"');
-            }
-            return new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
+        public GuavaWrapperCache() {
+            cache = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build();
         }
-    })
-    .extension(new CMSExtensions())
-    .templateCache( CMSConfigurationManager.isInThemeDevelopmentMode() ? null:  CacheBuilder.newBuilder().expireAfterWrite(10,
-        TimeUnit.MINUTES).build()).build();
+
+        @Override
+        public PebbleTemplate computeIfAbsent(final K key, final Function<? super K, ? extends PebbleTemplate> mappingFunction) {
+            try {
+                return this.cache.get(key, () -> mappingFunction.apply(key));
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void invalidateAll() {
+            cache.invalidateAll();
+        }
+    }
+
+    private final PebbleEngine engine = new PebbleEngine.Builder().loader(new ClasspathLoader() {
+                @Override
+                public Reader getReader(String templateName) throws LoaderException {
+                    String[] parts = templateName.split("/", 2);
+
+                    if (parts.length != 2) {
+                        throw new IllegalArgumentException("Not a valid name: " + templateName);
+                    }
+                    CMSTheme theme = CMSTheme.forType(parts[0]);
+                    if (theme == null) {
+                        throw new IllegalArgumentException("Theme " + parts[0] + " not found!");
+                    }
+
+                    byte[] bytes = theme.contentForPath(parts[1]);
+                    if (bytes == null) {
+                        throw new IllegalArgumentException("Theme " + parts[0] + " does not contain resource '" + parts[1] + '"');
+                    }
+                    return new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
+                }
+            }).extension(new CMSExtensions())
+            .templateCache(CMSConfigurationManager.isInThemeDevelopmentMode() ? null : new GuavaWrapperCache()).build();
 
     public CMSRenderer() {
-        if(CMSConfigurationManager.isInThemeDevelopmentMode()){
+        if (CMSConfigurationManager.isInThemeDevelopmentMode()) {
             logger.debug("CMS Theme Development Mode enabled!");
         }
     }
@@ -130,7 +161,7 @@ public class CMSRenderer {
     }
 
     private void renderPage(final HttpServletRequest req, String reqPagePath, HttpServletResponse res, Site site, Page page,
-                            String[] requestContext) throws PebbleException, IOException {
+            String[] requestContext) throws PebbleException, IOException {
 
         TemplateContext global = new TemplateContext();
         global.setRequestContext(requestContext);
@@ -151,8 +182,8 @@ public class CMSRenderer {
 
         global.put("components", components);
 
-        for (RenderingPageHandler handler : HANDLERS){
-            handler.accept(page,global);
+        for (RenderingPageHandler handler : HANDLERS) {
+            handler.accept(page, global);
         }
 
         CMSTheme theme = site.getTheme();
@@ -175,8 +206,8 @@ public class CMSRenderer {
 
     private List<Object> makeMenuWrapper(Site site, Page page) {
         ArrayList<Object> result =
-            site.getOrderedMenusSet().stream().map(menu -> page == null ? menu.makeWrap() : menu.makeWrap(page))
-                .collect(Collectors.toCollection(ArrayList::new));
+                site.getOrderedMenusSet().stream().map(menu -> page == null ? menu.makeWrap() : menu.makeWrap(page))
+                        .collect(Collectors.toCollection(ArrayList::new));
         return result;
     }
 
@@ -236,7 +267,6 @@ public class CMSRenderer {
         }
     }
 
-
     private static String getFullURL(HttpServletRequest request) {
         StringBuffer requestURL = request.getRequestURL();
         String queryString = request.getQueryString();
@@ -247,14 +277,14 @@ public class CMSRenderer {
     }
 
     public void invalidateEntry(String key) {
-        engine.getTemplateCache().invalidate(key);
+        engine.getTemplateCache().invalidateAll();
     }
 
-    public static void addHandler(RenderingPageHandler handler){
+    public static void addHandler(RenderingPageHandler handler) {
         HANDLERS.add(handler);
     }
 
-    public static void removeHandler(RenderingPageHandler handler){
+    public static void removeHandler(RenderingPageHandler handler) {
         HANDLERS.remove(handler);
     }
 }

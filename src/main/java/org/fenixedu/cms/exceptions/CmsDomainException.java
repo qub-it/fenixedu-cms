@@ -20,8 +20,8 @@ package org.fenixedu.cms.exceptions;
 
 import org.fenixedu.bennu.core.domain.exceptions.DomainException;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Created by nurv on 22/08/14.

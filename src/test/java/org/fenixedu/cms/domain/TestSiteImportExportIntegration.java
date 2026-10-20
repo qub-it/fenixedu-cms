@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.FenixFrameworkRunner;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
