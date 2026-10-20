@@ -20,11 +20,13 @@ package org.fenixedu.cms.rendering;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
-import com.mitchellbosecke.pebble.extension.AbstractExtension;
-import com.mitchellbosecke.pebble.extension.Filter;
-import com.mitchellbosecke.pebble.extension.Function;
-import com.mitchellbosecke.pebble.extension.Test;
-import com.mitchellbosecke.pebble.tokenParser.TokenParser;
+import io.pebbletemplates.pebble.extension.AbstractExtension;
+import io.pebbletemplates.pebble.extension.Filter;
+import io.pebbletemplates.pebble.extension.Function;
+import io.pebbletemplates.pebble.extension.Test;
+import io.pebbletemplates.pebble.tokenParser.TokenParser;
+import io.pebbletemplates.pebble.template.EvaluationContext;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.fenixedu.bennu.portal.servlet.LazyForTokenParser;
 import org.joda.time.DateTime;
@@ -42,7 +44,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             if (input != null) {
                 if (input.getClass().isArray()) {
                     return Array.getLength(input);
@@ -61,7 +63,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object execute(Map<String, Object> args) {
+        public Object execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             if (args.get("map") != null && args.get("map") instanceof Map) {
                 return ((Map<?, ?>) args.get("map")).entrySet();
             }
@@ -77,7 +79,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             if (input instanceof DateTime) {
                 String pattern = (String) args.get("format");
                 if (pattern == null) {
@@ -99,7 +101,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             return input instanceof Iterable ? Iterables.getFirst((Iterable<?>) input, null) : null;
         }
 
@@ -113,7 +115,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             return input instanceof Iterable ? Iterables.skip((Iterable<?>) input, 1) : null;
         }
 
@@ -127,7 +129,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             if (input != null && input instanceof String) {
                 return capitalizeFully((String) input);
             } else {
@@ -162,7 +164,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             List<Object> list = new ArrayList<Object>();
             if (input != null && input instanceof List) {
                 list.addAll((List<?>) input);
@@ -181,7 +183,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object execute(Map<String, Object> args) {
+        public Object execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             String bundle = (String) args.get("bundle");
             String key = args.get("key").toString();
             return BundleUtil.getString(bundle, key, arguments(args));
@@ -206,7 +208,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object execute(Map<String, Object> args) {
+        public Object execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             Object mapObject = args.get("map");
             Object keyObject = args.get("key");
             Preconditions.checkArgument(mapObject != null && keyObject != null, "Please specify non empty 'map' and 'key'");
@@ -224,7 +226,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public Object execute(Map<String, Object> args) {
+        public Object execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             Range<Integer> range = Range.closedOpen((Integer) args.get("from"), (Integer) args.get("to"));
             return ContiguousSet.create(range, DiscreteDomain.integers());
         }
@@ -251,7 +253,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         @Override
-        public boolean apply(Object input, Map<String, Object> args) {
+        public boolean apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
             return ((Collection<?>) args.get("collection")).contains(input);
         }
 

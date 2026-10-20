@@ -20,11 +20,11 @@ package org.fenixedu.cms.routing;
 
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.LoaderException;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.ClasspathLoader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.error.LoaderException;
+import io.pebbletemplates.pebble.error.PebbleException;
+import io.pebbletemplates.pebble.loader.ClasspathLoader;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
@@ -247,7 +247,7 @@ public class CMSRenderer {
     }
 
     public void invalidateEntry(String key) {
-        engine.getTemplateCache().invalidate(key);
+        engine.getTemplateCache().invalidateAll();
     }
 
     public static void addHandler(RenderingPageHandler handler){

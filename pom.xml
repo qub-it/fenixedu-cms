@@ -23,7 +23,7 @@
 		<version.com.google.apis.google-api-services-analytics>v3-rev136-1.22.0</version.com.google.apis.google-api-services-analytics>
 		<version.com.google.code.gson.gson>2.8.0</version.com.google.code.gson.gson>
 		<version.com.google.guava>33.2.1-jre</version.com.google.guava>
-		<version.com.mitchellbosecke.pebble>2.3.0</version.com.mitchellbosecke.pebble>
+		<version.io.pebbletemplates.pebble>3.2.2</version.io.pebbletemplates.pebble>
 		<version.commons-io.commons-io>2.5</version.commons-io.commons-io>
 		<version.jakarta.servlet.jsp.jstl>3.0.2</version.jakarta.servlet.jsp.jstl>
 		<version.jakarta.ws.rs.jakarta.ws.rs.api>3.1.0</version.jakarta.ws.rs.jakarta.ws.rs.api>
@@ -138,9 +138,9 @@
 			<version>${version.com.google.guava}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mitchellbosecke</groupId>
+			<groupId>io.pebbletemplates</groupId>
 			<artifactId>pebble</artifactId>
-			<version>${version.com.mitchellbosecke.pebble}</version>
+			<version>${version.io.pebbletemplates.pebble}</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.activation</groupId>
