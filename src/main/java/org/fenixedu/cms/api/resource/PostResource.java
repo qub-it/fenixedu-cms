@@ -123,6 +123,8 @@ public class PostResource extends BennuRestResource {
     public void createFileFromRequest(Post post, Part part) throws IOException {
         post.ensureCanEditPost();
         GroupBasedFile groupBasedFile = new GroupBasedFile(part.getName(), part.getName(), part.getInputStream(), Group.logged());
+        groupBasedFile.setAccessControlExpression(
+                "code[com.qubit.terra.foundation.services.fenixFramework.domain.accessControl.LoggedGroup]");
 
         PostFile postFile = new PostFile(post, groupBasedFile, false, 0);
         post.addFiles(postFile);

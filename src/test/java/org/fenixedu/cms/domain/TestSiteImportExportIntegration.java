@@ -29,11 +29,14 @@ public class TestSiteImportExportIntegration extends TestCMS {
     private static final String SLUG_PAGE = "ImporterJsonPage";
     private static final String SLUG_EMPTY_SITE = "ImporterEmptySite";
     private static final String SLUG_EMPTY_POST = "ImporterEmptyPost";
+    private static final String OMNIS_ACCESS_EXPRESSION =
+            "code[com.qubit.terra.foundation.services.fenixFramework.domain.accessControl.EveryoneGroup]";
 
     @Test
     public void jsonImportEmptySite() {
         User user = CmsTestUtils.createAuthenticatedUser(SLUG_EMPTY_SITE);
         Site site = CmsTestUtils.createSite(user, SLUG_EMPTY_SITE);
+        site.setViewAccessExpression(OMNIS_ACCESS_EXPRESSION);
         Site importedSite = exportAndImport(site);
         assertEqualSites(site, importedSite);
     }
@@ -48,6 +51,7 @@ public class TestSiteImportExportIntegration extends TestCMS {
         post.setMetadata(new PostMetadata().with("firstKey", "my-test-value").with("secondKey", "secondTestValue"));
         post.setPublicationBegin(new DateTime());
         post.setPublicationEnd(null);
+        post.setViewAccessExpression(OMNIS_ACCESS_EXPRESSION);
         Site importedSite = exportAndImport(site);
         assertEqualSites(site, importedSite);
     }
@@ -97,6 +101,7 @@ public class TestSiteImportExportIntegration extends TestCMS {
                                 && r.getRoleTemplate().getExternalId().equals(role.getRoleTemplate().getExternalId()))));
 
         Assert.assertEquals(importedSite.getCanViewGroup(), site.getCanViewGroup());
+        Assert.assertEquals(importedSite.getViewAccessExpression(), site.getViewAccessExpression());
         Assert.assertNotEquals(importedSite.getExternalId(), site.getExternalId());
         Assert.assertEquals(importedSite.getThemeType(), site.getThemeType());
         Assert.assertFalse(importedSite.getPublished());
@@ -174,6 +179,7 @@ public class TestSiteImportExportIntegration extends TestCMS {
                     .containsAll(originalPost.getCategoriesSet().stream().map(Category::getSlug).collect(toList()));
 
             assertEquals(importedPost.getMetadata(), originalPost.getMetadata());
+            assertEquals(importedPost.getViewAccessExpression(), originalPost.getViewAccessExpression());
             assertTrue(equalDates(importedPost.getPublicationBegin(), originalPost.getPublicationBegin()));
             assertTrue(equalDates(importedPost.getPublicationEnd(), originalPost.getPublicationEnd()));
             assertEquals(importedPost.getLocation(), originalPost.getLocation());

@@ -65,6 +65,10 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
             postFile.getFiles().setAccessGroup(Group.parse(jObj.get("accessGroup").getAsString()));
         }
 
+        if (jObj.has("accessControlExpression") && !jObj.get("accessControlExpression").isJsonNull()) {
+            postFile.getFiles().setAccessControlExpression(jObj.get("accessControlExpression").getAsString());
+        }
+
         Signal.emit(PostFile.SIGNAL_EDITED, new DomainObjectEvent<>(postFile));
         return postFile;
     }
@@ -90,10 +94,17 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
         json.addProperty("size", file.getSize());
 
         if (file.getAccessGroup() != null) {
-            if(!file.getAccessGroup().isMember(Authenticate.getUser())) {
+            if (!file.isAccessible(Authenticate.getUser())) {
                 throw CmsDomainException.forbiden();
             }
             json.addProperty("accessGroup", file.getAccessGroup().getPresentationName());
+        }
+
+        if (file.getAccessControlExpression() != null) {
+            if (!file.isAccessible(Authenticate.getUser())) {
+                throw CmsDomainException.forbiden();
+            }
+            json.addProperty("accessControlExpression", file.getAccessControlExpression());
         }
 
         json.addProperty("url", FileDownloadServlet.getDownloadUrl(file));

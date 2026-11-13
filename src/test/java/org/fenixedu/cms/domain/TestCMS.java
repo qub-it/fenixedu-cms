@@ -8,6 +8,10 @@ import org.fenixedu.cms.domain.component.*;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 import org.junit.BeforeClass;
+
+import com.qubit.terra.framework.services.ServiceProvider;
+import com.qubit.terra.framework.services.accessControl.AccessControlService;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
@@ -30,6 +34,7 @@ public class TestCMS {
     public static void initObjects() throws ClassNotFoundException {
         if (!run) {
             ensure();
+            ServiceProvider.registerService(AccessControlService.class, TestAccessControlService.class);
         }
         run = true;
     }

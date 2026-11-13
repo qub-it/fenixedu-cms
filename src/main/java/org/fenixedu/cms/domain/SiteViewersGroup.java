@@ -18,6 +18,7 @@
  */
 package org.fenixedu.cms.domain;
 
+import org.apache.commons.lang3.StringUtils;
 import org.fenixedu.bennu.core.annotation.GroupArgument;
 import org.fenixedu.bennu.core.annotation.GroupArgumentParser;
 import org.fenixedu.bennu.core.annotation.GroupOperator;
@@ -30,6 +31,10 @@ import org.joda.time.DateTime;
 
 import java.util.*;
 import java.util.stream.Stream;
+
+import com.qubit.terra.framework.services.ServiceProvider;
+import com.qubit.terra.framework.services.accessControl.AccessControlService;
+import com.qubit.terra.framework.services.context.ApplicationUser;
 
 @GroupOperator("siteViewers")
 public class SiteViewersGroup extends CustomGroup {
@@ -86,7 +91,10 @@ public class SiteViewersGroup extends CustomGroup {
         if (!site.getPublished()) {
             return Stream.empty();
         }
-        return site.getCanViewGroup().getMembers();
+
+        String expression = StringUtils.defaultIfBlank(site.getViewAccessExpression(), site.getCanViewGroup().getExpression());
+        return ServiceProvider.getService(AccessControlService.class).getUsersWithAccess(expression).stream()
+                .map(ApplicationUser::getUsername).map(User::findByUsername);
     }
 
     @Override
@@ -97,7 +105,7 @@ public class SiteViewersGroup extends CustomGroup {
     @Override
     public boolean isMember(User user) {
         if (Optional.ofNullable(site.getPublished()).orElse(false)) {
-            return site.getCanViewGroup().isMember(user);
+            return site.canView(user);
         }
         return false;
     }

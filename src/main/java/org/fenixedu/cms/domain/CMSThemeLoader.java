@@ -146,8 +146,11 @@ public class CMSThemeLoader {
         if (themeDef.has("thumbnail")) {
             CMSThemeFile thumbnail = theme.fileForPath(themeDef.get("thumbnail").getAsString());
 
-            theme.setPreviewImage(new GroupBasedFile(thumbnail.getFileName(), thumbnail.getFullPath(), thumbnail.getContent(),
-                    Group.anyone()));
+            final GroupBasedFile previewImage =
+                    new GroupBasedFile(thumbnail.getFileName(), thumbnail.getFullPath(), thumbnail.getContent(), Group.anyone());
+            previewImage.setAccessControlExpression(
+                    "code[com.qubit.terra.foundation.services.fenixFramework.domain.accessControl.EveryoneGroup]");
+            theme.setPreviewImage(previewImage);
             theme.setPreviewImagePath(themeDef.get("thumbnail").getAsString());
         }
 

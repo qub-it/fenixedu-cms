@@ -99,6 +99,7 @@ public class SiteExporter {
         siteJson.add("name", site.getName().json());
         siteJson.add("description", site.getDescription().json());
         siteJson.add("canViewGroup", export(site.getCanViewGroup()));
+        siteJson.add("viewAccessExpression", export(site.getViewAccessExpression()));
         siteJson.addProperty("themeType", site.getThemeType());
         siteJson.addProperty("embedded", site.getEmbedded());
         siteJson.addProperty("analyticsCode", site.getAnalyticsCode());
@@ -120,6 +121,7 @@ public class SiteExporter {
         pageJson.add("name", page.getName().json());
         pageJson.addProperty("site", page.getSite().getSlug());
         pageJson.add("canViewGroup", export(page.getCanViewGroup()));
+        pageJson.add("viewAccessExpression", export(page.getViewAccessExpression()));
         pageJson.addProperty("templateType", page.getTemplateType());
         pageJson.addProperty("createdBy", page.getCreatedBy().getUsername());
         pageJson.add("creationDate", toJson(page.getCreationDate()));
@@ -168,6 +170,7 @@ public class SiteExporter {
         json.addProperty("createdBy", post.getCreatedBy().getUsername());
         json.add("creationDate", toJson(post.getCreationDate()));
         json.add("canViewGroup", export(post.getCanViewGroup()));
+        json.add("viewAccessExpression", export(post.getViewAccessExpression()));
         json.add("categories", toArray(post.getCategoriesSet().stream().map(Category::getSlug)));
         json.addProperty("active", post.getActive());
         json.add("location", ofNullable(post.getLocation()).map(LocalizedString::json).orElse(JsonNull.INSTANCE));
@@ -198,6 +201,7 @@ public class SiteExporter {
         json.addProperty("isEmbedded", postFile.getIsEmbedded());
         json.addProperty("post", postFile.getPost().getSlug());
         json.add("viewGroup", export(postFile.getFiles().getAccessGroup()));
+        json.add("accessControlExpression", export(postFile.getFiles().getAccessControlExpression()));
         json.addProperty("displayName", postFile.getFiles().getDisplayName());
         json.addProperty("fileName", postFile.getFiles().getFilename());
         json.addProperty("url", FileDownloadServlet.getDownloadUrl(postFile.getFiles()));
@@ -211,6 +215,10 @@ public class SiteExporter {
 
     private JsonElement export(Group group) {
         return group != null ? new JsonPrimitive(group.getExpression()) : JsonNull.INSTANCE;
+    }
+
+    private JsonElement export(String string) {
+        return string == null ? JsonNull.INSTANCE : new JsonPrimitive(string);
     }
 
     private JsonElement toJson(DateTime date) {

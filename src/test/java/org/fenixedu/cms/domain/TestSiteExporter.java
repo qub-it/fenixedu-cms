@@ -21,6 +21,9 @@ import static org.junit.Assert.*;
 @RunWith(FenixFrameworkRunner.class)
 public class TestSiteExporter extends TestCMS {
 
+    private static final String OMNIS_ACCESS_EXPRESSION =
+            "code[com.qubit.terra.foundation.services.fenixFramework.domain.accessControl.EveryoneGroup]";
+
     @Test
     public void jsonExportEmptySite() {
         User user = CmsTestUtils.createAuthenticatedUser("exportEmptySiteUser");
@@ -80,6 +83,7 @@ public class TestSiteExporter extends TestCMS {
         post.setMetadata(new PostMetadata().with("firstKey", "my-test-value").with("secondKey", "secondTestValue"));
         post.setPublicationBegin(new DateTime());
         post.setPublicationEnd(null);
+        post.setViewAccessExpression(OMNIS_ACCESS_EXPRESSION);
 
         JsonObject json = new SiteExporter(site).export(site);
 
@@ -118,6 +122,9 @@ public class TestSiteExporter extends TestCMS {
         assertTrue(postJson.has("canViewGroup"));
         assertEquals(postJson.get("canViewGroup").getAsString(), post.getCanViewGroup().getExpression());
         assertTrue(Group.parse(postJson.get("canViewGroup").getAsString()).equals(post.getCanViewGroup()));
+
+        assertTrue(postJson.has("viewAccessExpression"));
+        assertEquals(postJson.get("viewAccessExpression").getAsString(), post.getViewAccessExpression());
 
         assertTrue(postJson.has("active"));
         assertEquals(postJson.get("active").getAsBoolean(), post.getActive());
@@ -229,6 +236,9 @@ public class TestSiteExporter extends TestCMS {
         Page page1 = CmsTestUtils.createPage(site, "jsonPage1");
         Page page2 = CmsTestUtils.createPage(site, "jsonPage2");
         Page page3 = CmsTestUtils.createPage(site, "jsonPage3");
+        page1.setViewAccessExpression(OMNIS_ACCESS_EXPRESSION);
+        page2.setViewAccessExpression(OMNIS_ACCESS_EXPRESSION);
+        page3.setViewAccessExpression(OMNIS_ACCESS_EXPRESSION);
         page2.addComponents(new ListCategoryPosts(CmsTestUtils.createCategory(site, "jsonPage")));
         page3.addComponents(new StaticPost(CmsTestUtils.createPost(site, "jsonPage")));
         page3.addComponents(new StaticPost(CmsTestUtils.createPost(site, "jsonPage22")));
@@ -258,6 +268,9 @@ public class TestSiteExporter extends TestCMS {
 
             assertTrue(pageJson.has("canViewGroup"));
             assertEquals(Group.parse(pageJson.get("canViewGroup").getAsString()), page.getCanViewGroup());
+
+            assertTrue(pageJson.has("viewAccessExpression"));
+            assertEquals(pageJson.get("viewAccessExpression").getAsString(), page.getViewAccessExpression());
 
             assertTrue(pageJson.has("published"));
             assertEquals(pageJson.get("published").getAsBoolean(), page.getPublished());

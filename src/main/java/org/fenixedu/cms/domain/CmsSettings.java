@@ -18,15 +18,23 @@
  */
 package org.fenixedu.cms.domain;
 
+import org.apache.commons.lang3.StringUtils;
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 import org.fenixedu.bennu.core.domain.groups.PersistentDynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 
+import com.qubit.terra.framework.services.ServiceProvider;
+import com.qubit.terra.framework.services.accessControl.AccessControlService;
+
 public class CmsSettings extends CmsSettings_Base {
 
     private CmsSettings() {
+        super();
+        setBennu(Bennu.getInstance());
+
         PersistentDynamicGroup managers = Group.managers().toPersistentGroup();
         setFoldersManagers(managers);
         setRolesManagers(managers);
@@ -43,7 +51,9 @@ public class CmsSettings extends CmsSettings_Base {
     }
 
     public boolean canManageSettings() {
-        return getSettingsManagers().isMember(Authenticate.getUser());
+        String expression = StringUtils.defaultIfBlank(getSettingsManagersAccessExpression(),
+                getSettingsManagers().toGroup().getExpression());
+        return ServiceProvider.getService(AccessControlService.class).hasAccess(Authenticate.getUser().getUsername(), expression);
     }
 
     public boolean canManageThemes() {
@@ -82,6 +92,12 @@ public class CmsSettings extends CmsSettings_Base {
         if (!canManageGlobalPermissions()) {
             throw CmsDomainException.forbiden();
         }
+    }
+
+    @Override
+    public void setSettingsManagers(PersistentGroup group) {
+        super.setSettingsManagers(group);
+        setSettingsManagersAccessExpression(null);
     }
 
     public static CmsSettings getInstance() {

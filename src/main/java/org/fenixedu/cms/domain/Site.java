@@ -30,8 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.signals.DomainObjectEvent;
@@ -60,6 +62,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.qubit.terra.framework.services.ServiceProvider;
+import com.qubit.terra.framework.services.accessControl.AccessControlService;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
@@ -121,6 +125,11 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         return getViewGroup().toGroup();
     }
 
+    public boolean canView(User user) {
+        String expression = StringUtils.defaultIfBlank(getViewAccessExpression(), getCanViewGroup().getExpression());
+        return ServiceProvider.getService(AccessControlService.class).hasAccess(user.getUsername(), expression);
+    }
+
     /**
      * sets the access group for this site
      *
@@ -129,6 +138,12 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     @Atomic
     public void setCanViewGroup(final Group group) {
         setViewGroup(group.toPersistentGroup());
+    }
+
+    @Override
+    protected void setViewGroup(PersistentGroup viewGroup) {
+        super.setViewGroup(viewGroup);
+        setViewAccessExpression(null);
     }
 
     /**
@@ -335,6 +350,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
             LocalizedString description = getDescription() != null ? fromJson(getDescription().json()) : null;
             Site clone = new Site(name, description);
             cloneCache.setClone(Site.this, clone);
+            clone.setViewAccessExpression(getViewAccessExpression());
             clone.setCanViewGroup(getCanViewGroup());
             // TODO: Set Default Permissions
             clone.setThemeType(getThemeType());
