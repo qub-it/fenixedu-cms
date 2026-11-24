@@ -25,7 +25,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.signals.DomainObjectEvent;
@@ -40,6 +42,9 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.qubit.terra.framework.services.ServiceProvider;
+import com.qubit.terra.framework.services.accessControl.AccessControlService;
 
 import pt.ist.fenixframework.Atomic;
 
@@ -209,6 +214,11 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         return getViewGroup().toGroup();
     }
 
+    public boolean canView(User user) {
+        String expression = StringUtils.defaultIfBlank(getViewAccessExpression(), getCanViewGroup().getExpression());
+        return ServiceProvider.getService(AccessControlService.class).hasAccess(user.getUsername(), expression);
+    }
+
     /**
      * sets the access group for this site
      *
@@ -218,6 +228,12 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     @Atomic
     public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
+    }
+
+    @Override
+    protected void setViewGroup(PersistentGroup viewGroup) {
+        super.setViewGroup(viewGroup);
+        setViewAccessExpression(null);
     }
 
     public static Page create(Site site, Menu menu, MenuItem parent, LocalizedString name, boolean published, String template,
@@ -340,7 +356,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             LocalizedString name = getName() != null ? fromJson(getName().json()) : null;
             Page clone = new Page(getSite(), name);
             cloneCache.setClone(Page.this, clone);
-            clone.setCanViewGroup(getCanViewGroup());
+            clone.setViewAccessExpression(getViewAccessExpression());
             clone.setPublished(getPublished());
             clone.setCreatedBy(getCreatedBy());
             clone.setModificationDate(getModificationDate());

@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.fenixedu.bennu.core.domain.User;
+import org.apache.commons.lang3.StringUtils;
+import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.signals.DomainObjectEvent;
@@ -51,6 +53,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.qubit.terra.framework.services.ServiceProvider;
+import com.qubit.terra.framework.services.accessControl.AccessControlService;
+import com.qubit.terra.framework.services.context.ApplicationUser;
 
 import pt.ist.fenixframework.Atomic;
 
@@ -210,6 +215,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     @Atomic
     public void setCanViewGroup(Group group) {
         super.setViewGroup(group.toPersistentGroup());
+        super.setViewAccessExpression(null);
         getEmbeddedFilesSorted().forEach(postFile -> postFile.getFiles().setAccessGroup(group));
 
         //if the new group is more restricted then the attachment group is updated
@@ -220,6 +226,33 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
                     .filter(file -> !file.getAccessGroup().getMembers().allMatch(groupMembers::contains))
                     .forEach(file -> file.setAccessGroup(group));
         }
+    }
+
+    @Override
+    protected void setViewGroup(PersistentGroup viewGroup) {
+        super.setViewGroup(viewGroup);
+        setViewAccessExpression(null);
+    }
+
+    @Override
+    public void setViewAccessExpression(String expression) {
+        super.setViewAccessExpression(expression);
+        getEmbeddedFilesSorted().forEach(postFile -> postFile.getFiles().setAccessControlExpression(expression));
+
+        AccessControlService service = ServiceProvider.getService(AccessControlService.class);
+        Set<User> postMembers =
+                service.getUsersWithAccess(expression).stream().map(ApplicationUser::getUsername).map(User::findByUsername)
+                        .collect(Collectors.toSet());
+
+        getAttachmentFilesSorted().map(PostFile::getFiles).forEach(file -> {
+            Set<User> fileMembers =
+                    service.getUsersWithAccess(file.getAccessControlExpression()).stream().map(ApplicationUser::getUsername)
+                            .map(User::findByUsername).collect(Collectors.toSet());
+
+            if (!postMembers.containsAll(fileMembers)) {
+                file.setAccessControlExpression(expression);
+            }
+        });
     }
 
     public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, LocalizedString excerpt,
@@ -264,6 +297,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
                     getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
             clone.setLocation(getLocation() != null ? fromJson(getLocation().json()) : null);
             clone.setMetadata(getMetadata() != null ? getMetadata().clone() : null);
+            clone.setViewAccessExpression(getViewAccessExpression());
             clone.setCanViewGroup(getCanViewGroup());
             clone.setPublicationBegin(getPublicationBegin());
             clone.setPublicationEnd(getPublicationEnd());
@@ -415,11 +449,14 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         }
 
         public boolean isVisible() {
-            return getCanViewGroup().isMember(Authenticate.getUser());
+            return Post.this.isAccessible(Authenticate.getUser());
         }
 
         public String getVisibilityGroup() {
-            return getCanViewGroup().toPersistentGroup().getPresentationName();
+            // TODO we can't fetch presentationName for omnisAccessControlExpression
+            return StringUtils.isNotBlank(
+                    getViewAccessExpression()) ? getViewAccessExpression() : getCanViewGroup().toPersistentGroup()
+                    .getPresentationName();
         }
 
         public LocalizedString getExcerpt() {
@@ -483,7 +520,12 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public boolean isAccessible() {
-        return getCanViewGroup().isMember(Authenticate.getUser());
+        return isAccessible(Authenticate.getUser());
+    }
+
+    public boolean isAccessible(final User user) {
+        String expression = StringUtils.defaultIfBlank(getViewAccessExpression(), getCanViewGroup().getExpression());
+        return ServiceProvider.getService(AccessControlService.class).hasAccess(user.getUsername(), expression);
     }
 
     public boolean isModified() {

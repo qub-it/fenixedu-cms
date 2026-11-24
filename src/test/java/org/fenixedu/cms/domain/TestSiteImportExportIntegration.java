@@ -53,6 +53,25 @@ public class TestSiteImportExportIntegration extends TestCMS {
     }
 
     @Test
+    public void jsonImportOmnisAccessExpressions() {
+        final String expression = "code[example.CmsEditorsGroup]";
+        final User user = CmsTestUtils.createAuthenticatedUser("cms-omnis-import-" + UUID.randomUUID());
+        final Site site = CmsTestUtils.createSite(user, "cmsOmnisImport");
+        final Page page = CmsTestUtils.createPage(site, "cmsOmnisImportPage");
+        final Post post = CmsTestUtils.createPost(site, "cmsOmnisImportPost");
+
+        site.setViewAccessExpression(expression);
+        page.setViewAccessExpression(expression);
+        post.setViewAccessExpression(expression);
+
+        final Site importedSite = exportAndImport(site);
+
+        assertEquals(expression, importedSite.getViewAccessExpression());
+        assertEquals(expression, importedSite.pageForSlug(page.getSlug()).getViewAccessExpression());
+        assertEquals(expression, importedSite.postForSlug(post.getSlug()).getViewAccessExpression());
+    }
+
+    @Test
     public void jsonCategories() {
         User user = CmsTestUtils.createAuthenticatedUser(SLUG_CATEGORIES);
         Site site = CmsTestUtils.createSite(user, SLUG_CATEGORIES);
@@ -96,7 +115,8 @@ public class TestSiteImportExportIntegration extends TestCMS {
                             .expression())
                                 && r.getRoleTemplate().getExternalId().equals(role.getRoleTemplate().getExternalId()))));
 
-        Assert.assertEquals(importedSite.getCanViewGroup(), site.getCanViewGroup());
+        Assert.assertEquals(importedSite.getViewAccessExpression(), site.getViewAccessExpression());
+        Assert.assertEquals(importedSite.getCanViewGroup().getExpression(), site.getCanViewGroup().getExpression());
         Assert.assertNotEquals(importedSite.getExternalId(), site.getExternalId());
         Assert.assertEquals(importedSite.getThemeType(), site.getThemeType());
         Assert.assertFalse(importedSite.getPublished());
@@ -168,7 +188,8 @@ public class TestSiteImportExportIntegration extends TestCMS {
             assertNotNull(importedPost);
             assertEquals(importedPost.getName(), originalPost.getName());
             assertEquals(importedPost.getBody(), originalPost.getBody());
-            assertEquals(importedPost.getCanViewGroup(), originalPost.getCanViewGroup());
+            assertEquals(importedPost.getViewAccessExpression(), originalPost.getViewAccessExpression());
+            assertEquals(importedPost.getCanViewGroup().getExpression(), originalPost.getCanViewGroup().getExpression());
             assertEquals(importedPost.getCategoriesSet().size(), originalPost.getCategoriesSet().size());
             importedPost.getCategoriesSet().stream().map(Category::getSlug).collect(toList())
                     .containsAll(originalPost.getCategoriesSet().stream().map(Category::getSlug).collect(toList()));

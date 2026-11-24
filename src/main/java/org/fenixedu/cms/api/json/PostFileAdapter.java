@@ -20,6 +20,8 @@ package org.fenixedu.cms.api.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import org.apache.commons.lang3.StringUtils;
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.json.JsonAdapter;
@@ -62,7 +64,12 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
         }
 
         if (jObj.has("accessGroup") && !jObj.get("accessGroup").isJsonNull()) {
-            postFile.getFiles().setAccessGroup(Group.parse(jObj.get("accessGroup").getAsString()));
+            // TODO Test if the try condition fails on Group.parse
+            try {
+                postFile.getFiles().setAccessGroup(Group.parse(jObj.get("accessGroup").getAsString()));
+            } catch (Exception ignored) {
+                postFile.getFiles().setAccessControlExpression(jObj.get("accessGroup").getAsString());
+            }
         }
 
         Signal.emit(PostFile.SIGNAL_EDITED, new DomainObjectEvent<>(postFile));
@@ -90,15 +97,22 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
         json.addProperty("size", file.getSize());
 
         if (file.getAccessGroup() != null) {
-            if(!file.getAccessGroup().isMember(Authenticate.getUser())) {
+            if (!file.isAccessible(Authenticate.getUser())) {
                 throw CmsDomainException.forbiden();
             }
-            json.addProperty("accessGroup", file.getAccessGroup().getPresentationName());
+            json.addProperty("accessGroup", getVisibilityGroup(file));
         }
 
         json.addProperty("url", FileDownloadServlet.getDownloadUrl(file));
 
         return json;
+    }
+
+    private String getVisibilityGroup(GroupBasedFile file) {
+        // TODO we can't fetch presentationName for omnisAccessControlExpression
+        return StringUtils.isNotBlank(
+                file.getAccessControlExpression()) ? file.getAccessControlExpression() : file.getAccessGroup()
+                .getPresentationName();
     }
 
 }
