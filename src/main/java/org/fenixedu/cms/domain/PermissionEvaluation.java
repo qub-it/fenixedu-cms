@@ -34,8 +34,8 @@ import java.util.stream.Stream;
 public class PermissionEvaluation {
 
     public static boolean canAccess(User user, Site site) {
-        return CmsSettings.getInstance().canManageSettings() ||
-                site.getRolesSet().stream().filter(x -> x.getGroup().isMember(user)).findAny().isPresent();
+        return CmsSettings.getInstance().canManageSettings() || site.getRolesSet().stream().filter(x -> x.hasAccess(user))
+                .findAny().isPresent();
     }
 
     public static boolean canDoThis(User user, Site site, Permission... permissions) {
@@ -47,7 +47,7 @@ public class PermissionEvaluation {
         for (Role role : site.getRolesSet()) {
             Set<Permission> availablePerms = role.getRoleTemplate().getPermissions().get();
             Set<Permission> intersection = Sets.intersection(availablePerms, requiredPerms);
-            if (!intersection.isEmpty() && role.getGroup().isMember(user)) {
+            if (!intersection.isEmpty() && role.hasAccess(user)) {
                 requiredPerms.removeAll(intersection);
             }
         }

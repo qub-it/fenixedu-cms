@@ -19,12 +19,17 @@
 package org.fenixedu.cms.domain;
 
 import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.domain.User;
+import org.apache.commons.lang3.StringUtils;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.signals.DomainObjectEvent;
 import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.qubit.terra.framework.services.ServiceProvider;
+import com.qubit.terra.framework.services.accessControl.AccessControlService;
 
 public class Role extends Role_Base {
 
@@ -48,6 +53,7 @@ public class Role extends Role_Base {
         setRoleTemplate(null);
         setSite(null);
         setPersistentGroup(null);
+        setMembershipAccessExpression(null);
         super.deleteDomainObject();
     }
 
@@ -55,6 +61,7 @@ public class Role extends Role_Base {
         logger.debug("Role " + getName().getContent() + " - " + getExternalId() + " changed to " + group.getExpression()
                 + " by user " + Authenticate.getUser().getUsername());
         setPersistentGroup(group.toPersistentGroup());
+        setMembershipAccessExpression(null);
     }
 
     public Group getGroup() {
@@ -62,6 +69,21 @@ public class Role extends Role_Base {
             return Group.nobody();
         }
         return getPersistentGroup().toGroup();
+    }
+
+    public void setAccessControlExpression(final String expression) {
+        if (StringUtils.isBlank(expression)) {
+            setMembershipAccessExpression(null);
+            return;
+        }
+
+        setMembershipAccessExpression(expression);
+        setPersistentGroup(Group.nobody().toPersistentGroup());
+    }
+
+    public boolean hasAccess(final User user) {
+        String expression = StringUtils.defaultIfBlank(getMembershipAccessExpression(), getGroup().getExpression());
+        return ServiceProvider.getService(AccessControlService.class).hasAccess(user.getUsername(), expression);
     }
 
     public LocalizedString getName() {

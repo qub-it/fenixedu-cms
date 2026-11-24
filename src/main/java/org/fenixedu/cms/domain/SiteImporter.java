@@ -19,11 +19,10 @@
 package org.fenixedu.cms.domain;
 
 import com.google.common.collect.Maps;
-import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.io.FileUtils;
+
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
@@ -40,7 +39,6 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -68,7 +66,7 @@ public class SiteImporter {
         Map<String, JsonObject> menusDir = readJsonDirectory("menus/");
         Site site = new Site(fromJson(siteJson.get("name")), fromJson(siteJson.get("description")));
         site.setSlug(siteJson.get("slug").getAsString());
-        site.setCanViewGroup(Group.parse(siteJson.get("canViewGroup").getAsString()));
+        site.setViewAccessExpression(siteJson.get("canViewGroup").getAsString());
 
         if (siteJson.has("themeType") && !siteJson.get("themeType").isJsonNull()) {
             site.setThemeType(siteJson.get("themeType").getAsString());
@@ -112,7 +110,7 @@ public class SiteImporter {
     
             Page page = new Page(site, fromJson(jsonObject.get("name")));
             page.setSlug(jsonObject.get("slug").getAsString());
-            page.setCanViewGroup(Group.parse(jsonObject.get("canViewGroup").getAsString()));
+            page.setViewAccessExpression(jsonObject.get("canViewGroup").getAsString());
             if (jsonObject.has("templateType") && !jsonObject.get("templateType").isJsonNull()) {
                 page.setTemplateType(jsonObject.get("templateType").getAsString());
             }
@@ -183,7 +181,7 @@ public class SiteImporter {
 
             post.setName(fromJson(jsonObject.get("name")));
             post.setSlug(jsonObject.get("slug").getAsString());
-            post.setCanViewGroup(Group.parse(jsonObject.get("canViewGroup").getAsString()));
+            post.setViewAccessExpression(jsonObject.get("canViewGroup").getAsString());
             post.setActive(jsonObject.get("active").getAsBoolean());
             if (jsonObject.has("location") && jsonObject.get("location").isJsonObject()) {
                 post.setLocation(fromJson(jsonObject.get("location")));
@@ -211,8 +209,8 @@ public class SiteImporter {
                     InputStream inputStream = getZipFile().getInputStream(
                             getZipFile().getEntry(normalize("files/" + postFileJson.get("file").getAsString())));
                     GroupBasedFile file = new GroupBasedFile(postFileJson.get("displayName").getAsString(),
-                            postFileJson.get("fileName").getAsString(),inputStream,
-                            Group.parse(postFileJson.get("viewGroup").getAsString()));
+                            postFileJson.get("fileName").getAsString(), inputStream, Group.nobody());
+                    CmsAccessControl.setFileAccessRule(file, postFileJson.get("viewGroup").getAsString());
                     new PostFile(post, file, postFileJson.get("isEmbedded").getAsBoolean(), postFileJson.get("index").getAsInt());
                     body = replace(body, postFileJson.get("url").getAsString(), FileDownloadServlet.getDownloadUrl(file));
                     excerpt = replace(excerpt, postFileJson.get("url").getAsString(), FileDownloadServlet.getDownloadUrl(file));

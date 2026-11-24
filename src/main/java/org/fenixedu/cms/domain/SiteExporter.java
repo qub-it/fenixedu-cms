@@ -19,6 +19,7 @@
 package org.fenixedu.cms.domain;
 
 import com.google.gson.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.io.FilenameUtils;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
@@ -98,7 +99,7 @@ public class SiteExporter {
         siteJson.addProperty("slug", site.getSlug());
         siteJson.add("name", site.getName().json());
         siteJson.add("description", site.getDescription().json());
-        siteJson.add("canViewGroup", export(site.getCanViewGroup()));
+        siteJson.add("canViewGroup", exportAccessRule(site.getViewAccessExpression(), site.getCanViewGroup()));
         siteJson.addProperty("themeType", site.getThemeType());
         siteJson.addProperty("embedded", site.getEmbedded());
         siteJson.addProperty("analyticsCode", site.getAnalyticsCode());
@@ -119,7 +120,7 @@ public class SiteExporter {
         pageJson.addProperty("slug", page.getSlug());
         pageJson.add("name", page.getName().json());
         pageJson.addProperty("site", page.getSite().getSlug());
-        pageJson.add("canViewGroup", export(page.getCanViewGroup()));
+        pageJson.add("canViewGroup", exportAccessRule(page.getViewAccessExpression(), page.getCanViewGroup()));
         pageJson.addProperty("templateType", page.getTemplateType());
         pageJson.addProperty("createdBy", page.getCreatedBy().getUsername());
         pageJson.add("creationDate", toJson(page.getCreationDate()));
@@ -167,7 +168,7 @@ public class SiteExporter {
         json.add("body", post.getBody().json());
         json.addProperty("createdBy", post.getCreatedBy().getUsername());
         json.add("creationDate", toJson(post.getCreationDate()));
-        json.add("canViewGroup", export(post.getCanViewGroup()));
+        json.add("canViewGroup", exportAccessRule(post.getViewAccessExpression(), post.getCanViewGroup()));
         json.add("categories", toArray(post.getCategoriesSet().stream().map(Category::getSlug)));
         json.addProperty("active", post.getActive());
         json.add("location", ofNullable(post.getLocation()).map(LocalizedString::json).orElse(JsonNull.INSTANCE));
@@ -197,7 +198,8 @@ public class SiteExporter {
         json.addProperty("index", postFile.getIndex());
         json.addProperty("isEmbedded", postFile.getIsEmbedded());
         json.addProperty("post", postFile.getPost().getSlug());
-        json.add("viewGroup", export(postFile.getFiles().getAccessGroup()));
+        json.add("viewGroup", exportAccessRule(postFile.getFiles().getAccessControlExpression(),
+                postFile.getFiles().getAccessGroup()));
         json.addProperty("displayName", postFile.getFiles().getDisplayName());
         json.addProperty("fileName", postFile.getFiles().getFilename());
         json.addProperty("url", FileDownloadServlet.getDownloadUrl(postFile.getFiles()));
@@ -209,8 +211,18 @@ public class SiteExporter {
         return component.json();
     }
 
-    private JsonElement export(Group group) {
-        return group != null ? new JsonPrimitive(group.getExpression()) : JsonNull.INSTANCE;
+    private JsonElement export(String expression) {
+        if (expression == null) {
+            return JsonNull.INSTANCE;
+        }
+        return new JsonPrimitive(expression);
+    }
+
+    private JsonElement exportAccessRule(final String expression, final Group legacyGroup) {
+        if (StringUtils.isNotBlank(expression)) {
+            return export(expression);
+        }
+        return export(legacyGroup.getExpression());
     }
 
     private JsonElement toJson(DateTime date) {

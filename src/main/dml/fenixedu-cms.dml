@@ -28,6 +28,7 @@ valueType org.fenixedu.cms.domain.PermissionsArray as PermissionsArray {
 }
 
 class Site{
+  String viewAccessExpression;
   String alternativeSite;
   String style;
   DateTime creationDate;
@@ -47,6 +48,7 @@ public class CMSFolder {
 }
 
 class Page{
+  String viewAccessExpression;
   DateTime creationDate;
   DateTime modificationDate;
   LocalizedString name;
@@ -81,6 +83,7 @@ class MenuItem{
 }
 
 class Post{
+  String viewAccessExpression;
   LocalizedString name;
   String slug;
   DateTime creationDate;
@@ -196,7 +199,12 @@ relation SiteViewersGroup {
     }
 }
 
-class CmsSettings {}
+class CmsSettings {
+  String foldersManagersAccessExpression;
+  String rolesManagersAccessExpression;
+  String settingsManagersAccessExpression;
+  String themesManagersAccessExpression;
+}
 
 relation CmsSettingsHasRoot {
   CmsSettings playsRole cmsSettings;
@@ -635,7 +643,9 @@ relation PreviousActivity{
  * ################################
  */
 
-class Role { }
+class Role {
+  String membershipAccessExpression;
+}
 
 class RoleTemplate {
   LocalizedString name;

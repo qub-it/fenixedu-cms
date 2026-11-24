@@ -54,6 +54,7 @@ public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wra
             try {
                 GroupBasedFile fileClone  = new GroupBasedFile(getFiles().getDisplayName(), getFiles().getFilename(),
                         getFiles().getStream(), getFiles().getAccessGroup());
+                CmsAccessControl.setFileAccessRule(fileClone, getFiles().getAccessControlExpression());
                 return new PostFile(getPost(), fileClone, getIsEmbedded(), getIndex());
             } catch (IOException e) {
                 throw new RuntimeException("Could not clone file " + getFiles().getDisplayName());
@@ -66,6 +67,7 @@ public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wra
     public void setIsEmbedded(boolean isEmbedded) {
         if (isEmbedded) {
             getFiles().setAccessGroup(getPost().getCanViewGroup());
+            getFiles().setAccessControlExpression(getPost().getViewAccessExpression());
         }
         super.setIsEmbedded(isEmbedded);
     }
